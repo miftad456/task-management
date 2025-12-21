@@ -1,12 +1,14 @@
 export const registerUserUsecase = ({ userRepository, passwordService }) => {
   const registerUser = async (userData) => {
     const hashedPassword = await passwordService.hashPassword(userData.password);
-    const user = await userRepository.create({ ...userData, password: hashedPassword });
+    // Default role is "user"
+    const user = await userRepository.create({ ...userData, password: hashedPassword, role: "user" });
     return user;
   };
   return { registerUser };
 };
 
+// src/usecase/user/user.usecase.js
 export const loginUserUsecase = ({ userRepository, passwordService, jwtService }) => {
   const loginUser = async (username, password) => {
     const user = await userRepository.findByUsername(username);
@@ -19,24 +21,23 @@ export const loginUserUsecase = ({ userRepository, passwordService, jwtService }
       userId: user.id,
       username: user.username,
       email: user.email,
+      role: user.role, // ✅ include role
     });
 
     const refreshToken = await jwtService.generateRefreshToken({
       userId: user.id,
       username: user.username,
       email: user.email,
+      role: user.role, // ✅ include role
     });
 
     await userRepository.saveRefreshToken(user.id, refreshToken);
 
-    const token = {
-      accessToken,
-      refreshToken,
-    };
-    return { user, token };
+    return { user, token: { accessToken, refreshToken } };
   };
   return { loginUser };
 };
+
 
 export const getUserUsecase = ({ userRepository }) => {
   const getUser = async (userId) => {
@@ -57,15 +58,12 @@ export const updateUserUsecase = ({ userRepository }) => {
 };
 
 export const refreshTokenUsecase = ({ userRepository, jwtService }) => {
-  // Accept the refresh token and handle verification, owner check, rotation
   const refreshToken = async (refreshTokenValue) => {
     if (!refreshTokenValue) throw new Error("Refresh token required");
 
-    // 1) Find owner by refresh token
     const user = await userRepository.findByRefreshToken(refreshTokenValue);
     if (!user) throw new Error("Invalid refresh token");
 
-    // 2) Verify refresh token signature/expiry
     let decoded;
     try {
       decoded = await jwtService.verifyRefreshToken(refreshTokenValue);
@@ -73,23 +71,22 @@ export const refreshTokenUsecase = ({ userRepository, jwtService }) => {
       throw new Error("Invalid or expired refresh token");
     }
 
-    // 3) Ensure token belongs to user
     if (user.id !== decoded.userId) throw new Error("Invalid refresh token");
 
-    // 4) Generate new tokens
     const accessToken = await jwtService.generateToken({
       userId: user.id,
       username: user.username,
       email: user.email,
+      role: user.role,
     });
 
     const newRefreshToken = await jwtService.generateRefreshToken({
       userId: user.id,
       username: user.username,
       email: user.email,
+      role: user.role,
     });
 
-    // 5) Persist new refresh token
     await userRepository.saveRefreshToken(user.id, newRefreshToken);
 
     return {
@@ -101,18 +98,14 @@ export const refreshTokenUsecase = ({ userRepository, jwtService }) => {
   return { refreshToken };
 };
 
-// logout.usecase.js
 export const logoutUsecase = ({ userRepository, jwtService }) => {
   const logout = async (refreshToken) => {
-    // 1️⃣ Find user by refresh token
     const user = await userRepository.findByRefreshToken(refreshToken);
     if (!user) throw new Error("Invalid refresh token");
 
-    // 2️⃣ Verify the refresh token
     const decoded = await jwtService.verifyRefreshToken(refreshToken);
     if (user.id !== decoded.userId) throw new Error("Invalid refresh token");
 
-    // 3️⃣ Revoke refresh token in DB
     await userRepository.revokeRefreshToken(user.id);
 
     return true;

@@ -13,3 +13,4 @@ export const validateUser = (req, res, next) => {
   if (error) return res.status(400).json(failure(error.message));
   next();
 };
+

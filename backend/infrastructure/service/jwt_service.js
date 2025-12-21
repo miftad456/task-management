@@ -10,7 +10,7 @@ if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
 }
 
 export const jwtService = {
-  generateToken: async (payload, options = { expiresIn: "15m" }) =>
+  generateToken: async (payload, options = { expiresIn: "50m" }) =>
     new Promise((resolve, reject) => {
       jwt.sign(payload, JWT_SECRET, options, (err, token) => (err ? reject(err) : resolve(token)));
     }),

@@ -1,5 +1,6 @@
 import { userRepository } from "../infrastructure/repository/user_repo.js";
 import { taskRepository } from "../infrastructure/repository/task_repo.js";
+import { teamRepository } from "../infrastructure/repository/team_repo.js";
 
 import { passwordService } from "../infrastructure/service/password_service.js";
 import { jwtService } from "../infrastructure/service/jwt_service.js";
@@ -26,13 +27,16 @@ import {
   getUserUsecase,
   refreshTokenUsecase,
   logoutUsecase,
-  
 } from "../usecase/user/user.usecase.js";
+
+// Team usecases
+import { teamUsecase } from "../usecase/team/team.usecase.js";
 
 export const dependencies = {
   repos: {
     userRepository,
     taskRepository,
+    teamRepository,
   },
 
   services: {
@@ -50,8 +54,8 @@ export const dependencies = {
     trackTimeUsecase: trackTimeUsecase(taskRepository),
     updateStatusUsecase: updateStatusUsecase(taskRepository),
     updatePriorityUsecase: updatePriorityUsecase(taskRepository),
-    getOverdueTasksUsecase : getOverdueTasksUsecase (taskRepository),
-    getUrgentTasksUsecase: getUrgentTasksUsecase ({taskRepository}),
+    getOverdueTasksUsecase: getOverdueTasksUsecase(taskRepository),
+    getUrgentTasksUsecase: getUrgentTasksUsecase({ taskRepository }),
 
     // User usecases
     registerUserUsecase: registerUserUsecase({ userRepository, passwordService }),
@@ -60,5 +64,8 @@ export const dependencies = {
     getUserUsecase: getUserUsecase({ userRepository }),
     refreshTokenUsecase: refreshTokenUsecase({ userRepository, jwtService }),
     logoutUsecase: logoutUsecase({ userRepository, jwtService }),
+
+    // Team usecases
+    teamUsecase: teamUsecase({ teamRepository, userRepository }),
   },
 };

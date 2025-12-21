@@ -1,6 +1,7 @@
 import express from "express";
 import { taskRouter } from "./api/router/task.router.js";
 import { userRouter } from "./api/router/user.router.js";
+import { teamRouter } from "./api/router/team.router.js"; // ✅ new
 import { dependencies } from "./api/dependencies.js";
 
 export const createServer = () => {
@@ -10,6 +11,7 @@ export const createServer = () => {
   // Pass dependencies to routers
   app.use("/tasks", taskRouter(dependencies));
   app.use("/users", userRouter(dependencies));
+  app.use("/teams", teamRouter(dependencies)); // ✅ new
 
   // Health check
   app.get("/", (req, res) => {

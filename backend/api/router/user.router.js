@@ -33,7 +33,7 @@ export const userRouter = (dependencies) => {
     try {
       const { username, password } = req.body;
       const { user, token } = await loginUserUsecase.loginUser(username, password);
-
+      
       res.json(
         success("Login successful", {
           user: toUserResponseDTO(user),

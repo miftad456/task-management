@@ -1,3 +1,4 @@
+// src/API/middlewares/auth.middleware.js
 import { failure } from "../utilities/response.js";
 import { jwtService } from "../../infrastructure/service/jwt_service.js";
 
@@ -11,11 +12,12 @@ export const authMiddleware = async (req, res, next) => {
     const token = authHeader.split(" ")[1];
     const decoded = await jwtService.verifyAccessToken(token);
 
-    // keep a consistent shape expected by routes/usecases
+    // Include role from JWT so roleMiddleware works
     req.user = {
       id: decoded.userId ?? decoded.id,
       username: decoded.username ?? decoded.userName ?? decoded.name,
       email: decoded.email,
+      role: decoded.role ?? "user", // default to "user"
     };
 
     next();
