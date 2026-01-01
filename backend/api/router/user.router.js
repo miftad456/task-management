@@ -2,6 +2,7 @@ import express from "express";
 import { validateUser } from "../schema/user.schema.js";
 import { toUserResponseDTO } from "../dto/user.dto.js";
 import { success, failure } from "../utilities/response.js";
+import { upload } from "../middlewares/upload.middleware.js";
 
 // Middlewares
 import { authMiddleware } from "../middlewares/auth.middleware.js";
@@ -16,6 +17,8 @@ export const userRouter = (dependencies) => {
     getUserUsecase,
     refreshTokenUsecase,
     logoutUsecase,
+    updateProfileUsecase,
+    getProfileUsecase,
   } = dependencies.usecases;
 
   /**
@@ -297,6 +300,47 @@ export const userRouter = (dependencies) => {
       await logoutUsecase.logout(refreshToken);
 
       res.json(success("Logout successful", null));
+    } catch (err) {
+      res.status(400).json(failure(err.message));
+    }
+  });
+
+  /**
+   * GET /users/profile/:id
+   * Get public profile of a user
+   */
+  router.get("/profile/:id", authMiddleware, async (req, res) => {
+    try {
+      const profile = await getProfileUsecase.execute(req.params.id);
+      res.json(success("User profile fetched", profile));
+    } catch (err) {
+      res.status(404).json(failure(err.message));
+    }
+  });
+
+  /**
+   * PUT /users/profile
+   * Update current user's profile (including picture)
+   */
+  router.put("/profile/update", authMiddleware, async (req, res) => {
+    try {
+      const updatedUser = await updateProfileUsecase.execute(req.user.id, req.body);
+      res.json(success("Profile updated", toUserResponseDTO(updatedUser)));
+    } catch (err) {
+      res.status(400).json(failure(err.message));
+    }
+  });
+
+  /**
+   * POST /users/profile/picture
+   * Upload profile picture
+   */
+  router.post("/profile/picture", authMiddleware, upload.single("picture"), async (req, res) => {
+    try {
+      if (!req.file) throw new Error("No file uploaded");
+      const profilePicture = req.file.path;
+      const updatedUser = await updateProfileUsecase.execute(req.user.id, { profilePicture });
+      res.json(success("Profile picture updated", toUserResponseDTO(updatedUser)));
     } catch (err) {
       res.status(400).json(failure(err.message));
     }

@@ -43,6 +43,10 @@ import {
   refreshTokenUsecase,
   logoutUsecase,
 } from "../usecase/user/user.usecase.js";
+import {
+  updateProfileUsecase,
+  getProfileUsecase,
+} from "../usecase/user/profile.usecase.js";
 
 // Team usecases
 import { teamUsecase } from "../usecase/team/team.usecase.js";
@@ -98,6 +102,8 @@ export const dependencies = {
     getUserUsecase: getUserUsecase({ userRepository }),
     refreshTokenUsecase: refreshTokenUsecase({ userRepository, jwtService }),
     logoutUsecase: logoutUsecase({ userRepository, jwtService }),
+    updateProfileUsecase: updateProfileUsecase(userRepository),
+    getProfileUsecase: getProfileUsecase(userRepository),
 
     // Team usecases
     teamUsecase: teamUsecase({ teamRepository, userRepository }),

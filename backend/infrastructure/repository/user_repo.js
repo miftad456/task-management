@@ -13,7 +13,10 @@ export const userRepository = {
       username: obj.username,
       email: obj.email,
       password: obj.password,
-      role: obj.role, // include role
+      role: obj.role,
+      profilePicture: obj.profilePicture || null,
+      bio: obj.bio || "",
+      experience: obj.experience || "",
       createdAt: obj.createdAt,
       refreshToken: obj.refreshToken || null,
     };
@@ -30,6 +33,9 @@ export const userRepository = {
       email: user.email,
       password: user.password,
       role: user.role,
+      profilePicture: user.profilePicture || null,
+      bio: user.bio || "",
+      experience: user.experience || "",
       createdAt: user.createdAt,
       refreshToken: user.refreshToken || null,
     };
@@ -46,6 +52,9 @@ export const userRepository = {
       email: user.email,
       password: user.password,
       role: user.role,
+      profilePicture: user.profilePicture || null,
+      bio: user.bio || "",
+      experience: user.experience || "",
       createdAt: user.createdAt,
       refreshToken: user.refreshToken || null,
     };
@@ -62,6 +71,9 @@ export const userRepository = {
       email: user.email,
       password: user.password,
       role: user.role,
+      profilePicture: user.profilePicture || null,
+      bio: user.bio || "",
+      experience: user.experience || "",
       createdAt: user.createdAt,
       refreshToken: user.refreshToken || null,
     };
@@ -77,7 +89,10 @@ export const userRepository = {
       username: updated.username,
       email: updated.email,
       password: updated.password,
-      role: updated.role, // include role
+      role: updated.role,
+      profilePicture: updated.profilePicture || null,
+      bio: updated.bio || "",
+      experience: updated.experience || "",
       createdAt: updated.createdAt,
       refreshToken: updated.refreshToken || null,
     };
@@ -98,7 +113,10 @@ export const userRepository = {
       username: user.username,
       email: user.email,
       password: user.password,
-      role: user.role, // include role
+      role: user.role,
+      profilePicture: user.profilePicture || null,
+      bio: user.bio || "",
+      experience: user.experience || "",
       createdAt: user.createdAt,
       refreshToken: user.refreshToken || null,
     };
@@ -123,7 +141,10 @@ export const userRepository = {
       username: updated.username,
       email: updated.email,
       password: updated.password,
-      role: updated.role, // include role
+      role: updated.role,
+      profilePicture: updated.profilePicture || null,
+      bio: updated.bio || "",
+      experience: updated.experience || "",
       createdAt: updated.createdAt,
       refreshToken: updated.refreshToken || null,
     };
