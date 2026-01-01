@@ -1,5 +1,5 @@
 export class Task {
-  constructor({ id, title, description, priority, status, deadline, userId, createdAt, timeSpent = 0, urgentBeforeMinutes = null }) {
+  constructor({ id, title, description, priority, status, deadline, userId, assignedBy = null, teamId = null, createdAt, timeSpent = 0, urgentBeforeMinutes = null, timeLogs = [], attachments = [] }) {
     this.id = id;
     this.title = title;
     this.description = description || "";
@@ -7,13 +7,29 @@ export class Task {
     this.status = status || "pending";
     this.deadline = deadline || null;
     this.userId = userId;
+    this.assignedBy = assignedBy;
+    this.teamId = teamId;
     this.createdAt = createdAt || new Date();
     this.timeSpent = timeSpent;
-    this.urgentBeforeMinutes = urgentBeforeMinutes; // NEW
+    this.urgentBeforeMinutes = urgentBeforeMinutes;
+    this.timeLogs = timeLogs;
+    this.attachments = attachments;
   }
 
   markCompleted() {
     this.status = "completed";
+  }
+
+  submit() {
+    this.status = "submitted";
+  }
+
+  approve() {
+    this.status = "completed";
+  }
+
+  reject() {
+    this.status = "pending";
   }
 
   setPriority(priority) {
@@ -27,13 +43,17 @@ export class Task {
     this.timeSpent += minutes;
   }
 
+  getTotalTimeFromLogs() {
+    return this.timeLogs.reduce((total, log) => total + (log.duration || 0), 0);
+  }
+
   isOverdue() {
     if (!this.deadline) return false;
-    return new Date() > new Date(this.deadline) && this.status !== "completed";
+    return new Date() > new Date(this.deadline) && !["completed", "submitted"].includes(this.status);
   }
 
   isUrgent() {
-    if (this.status === "completed") return false;
+    if (["completed", "submitted"].includes(this.status)) return false;
     const now = new Date();
     const deadline = new Date(this.deadline);
 
@@ -59,8 +79,12 @@ export class Task {
       status: this.status,
       deadline: this.deadline,
       userId: this.userId,
+      assignedBy: this.assignedBy,
+      teamId: this.teamId,
       timeSpent: this.timeSpent,
-      urgentBeforeMinutes: this.urgentBeforeMinutes, // NEW
+      urgentBeforeMinutes: this.urgentBeforeMinutes,
+      timeLogs: this.timeLogs,
+      attachments: this.attachments,
       createdAt: this.createdAt,
     };
   }

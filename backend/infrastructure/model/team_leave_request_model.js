@@ -9,6 +9,9 @@ const TeamLeaveRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// index to speed up team + status queries
+TeamLeaveRequestSchema.index({ teamId: 1, status: 1 });
+
 export const TeamLeaveRequestModel = mongoose.model(
   "TeamLeaveRequest",
   TeamLeaveRequestSchema

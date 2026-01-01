@@ -9,7 +9,19 @@ const TaskSchema = new mongoose.Schema(
     deadline: { type: Date, default: null },
     timeSpent: { type: Number, default: 0 },
     userId: { type: String, required: false },
-    urgentBeforeMinutes: { type: Number, default: null }, // NEW: user-defined urgency threshold
+    urgentBeforeMinutes: { type: Number, default: null },
+    attachments: [
+      {
+        filename: { type: String, required: true },
+        originalName: { type: String, required: true },
+        url: { type: String, required: true },
+        mimetype: { type: String, required: true },
+        size: { type: Number, required: true },
+        uploadedAt: { type: Date, default: Date.now },
+      },
+    ],
+    assignedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    teamId: { type: mongoose.Schema.Types.ObjectId, ref: "Team", default: null },
   },
   { timestamps: true }
 );

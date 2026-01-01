@@ -1,5 +1,6 @@
 // src/infrastructure/repository/team_repo.js
 
+import mongoose from "mongoose";
 import { TeamModel } from "../model/team_model.js";
 import { TeamLeaveRequestModel } from "../model/team_leave_request_model.js";
 import { Team } from "../../domain/entities/team.entity.js";
@@ -99,16 +100,23 @@ export const teamRepository = {
     return await req.save();
   },
 
-  // 2️⃣ Manager gets all leave requests for their team
-  getLeaveRequests: async (teamId) => {
-    return await TeamLeaveRequestModel.find({ teamId }).sort({ createdAt: -1 });
+  // 2️⃣ Manager gets leave requests for their team
+  //    - default: return only pending requests
+  //    - accepts optional status: 'pending'|'approved'|'rejected'|'all'
+  getLeaveRequests: async (teamId, status = "pending") => {
+    const filter = { teamId };
+    if (status && status !== "all") {
+      filter.status = status;
+    }
+    return await TeamLeaveRequestModel.find(filter).sort({ createdAt: -1 });
   },
+  // Fetch a single leave request by ID
   getLeaveRequestById: async (id) => {
-  return await TeamLeaveRequestModel.findById(id);
-},
+    return await TeamLeaveRequestModel.findById(id);
+  },
 
 
-  // 3️⃣ Approve leave request → remove member from team
+  // 3️⃣ Approve leave request → remove member from team (atomic)
   approveLeave: async (requestId) => {
     const req = await TeamLeaveRequestModel.findById(requestId);
     if (!req) throw new Error("Leave request not found");
@@ -116,26 +124,22 @@ export const teamRepository = {
     req.status = "approved";
     await req.save();
 
-    // Remove user from team
     const team = await TeamModel.findById(req.teamId);
     if (!team) throw new Error("Team not found");
 
-    team.members = (team.members || []).filter(
-      (m) => String(m) !== String(req.userId)
-    );
+    team.members = (team.members || []).filter((m) => String(m) !== String(req.userId));
     await team.save();
 
     return req;
   },
 
-  // 4️⃣ Reject leave request
+  // 4️⃣ Reject leave request (atomic for consistency)
   rejectLeave: async (requestId) => {
     const req = await TeamLeaveRequestModel.findById(requestId);
     if (!req) throw new Error("Leave request not found");
 
     req.status = "rejected";
     await req.save();
-
     return req;
   },
 };

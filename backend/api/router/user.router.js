@@ -18,7 +18,37 @@ export const userRouter = (dependencies) => {
     logoutUsecase,
   } = dependencies.usecases;
 
-  // REGISTER USER (PUBLIC)
+  /**
+   * @swagger
+   * /users/register:
+   *   post:
+   *     summary: Register a new user
+   *     tags: [Users]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/UserInput'
+   *     responses:
+   *       200:
+   *         description: User created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/SuccessResponse'
+   *                 - type: object
+   *                   properties:
+   *                     data:
+   *                       $ref: '#/components/schemas/UserResponse'
+   *       400:
+   *         description: Validation error or user already exists
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ErrorResponse'
+   */
   router.post("/register", validateUser, async (req, res) => {
     try {
       const data = await registerUserUsecase.registerUser(req.body);
@@ -28,12 +58,42 @@ export const userRouter = (dependencies) => {
     }
   });
 
-  // LOGIN USER (PUBLIC)
+  /**
+   * @swagger
+   * /users/login:
+   *   post:
+   *     summary: Login user
+   *     tags: [Users]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/LoginRequest'
+   *     responses:
+   *       200:
+   *         description: Login successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/SuccessResponse'
+   *                 - type: object
+   *                   properties:
+   *                     data:
+   *                       $ref: '#/components/schemas/LoginResponse'
+   *       400:
+   *         description: Invalid credentials
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ErrorResponse'
+   */
   router.post("/login", async (req, res) => {
     try {
       const { username, password } = req.body;
       const { user, token } = await loginUserUsecase.loginUser(username, password);
-      
+
       res.json(
         success("Login successful", {
           user: toUserResponseDTO(user),
@@ -45,7 +105,38 @@ export const userRouter = (dependencies) => {
     }
   });
 
-  // GET USER PROFILE (AUTH + OWNERSHIP)
+  /**
+   * @swagger
+   * /users/{id}:
+   *   get:
+   *     summary: Get user profile by ID
+   *     tags: [Users]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: User ID
+   *     responses:
+   *       200:
+   *         description: User profile retrieved
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/SuccessResponse'
+   *                 - type: object
+   *                   properties:
+   *                     data:
+   *                       $ref: '#/components/schemas/UserResponse'
+   *       401:
+   *         description: Unauthorized
+   *       404:
+   *         description: User not found
+   */
   router.get("/:id", authMiddleware, async (req, res) => {
     try {
       const user = await getUserUsecase.getUser(req.params.id);
@@ -55,7 +146,44 @@ export const userRouter = (dependencies) => {
     }
   });
 
-  // UPDATE USER PROFILE (AUTH + OWNERSHIP)
+  /**
+   * @swagger
+   * /users/{id}:
+   *   put:
+   *     summary: Update user profile
+   *     tags: [Users]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: User ID
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/UserInput'
+   *     responses:
+   *       200:
+   *         description: User updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/SuccessResponse'
+   *                 - type: object
+   *                   properties:
+   *                     data:
+   *                       $ref: '#/components/schemas/UserResponse'
+   *       400:
+   *         description: Validation error
+   *       401:
+   *         description: Unauthorized
+   */
   router.put(
     "/:id",
     authMiddleware,
@@ -70,7 +198,46 @@ export const userRouter = (dependencies) => {
     }
   );
 
-  // REFRESH TOKEN (PUBLIC - refresh token required)
+  /**
+   * @swagger
+   * /users/refresh-token:
+   *   post:
+   *     summary: Refresh access token
+   *     tags: [Users]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - refreshToken
+   *             properties:
+   *               refreshToken:
+   *                 type: string
+   *                 description: Refresh token from login
+   *     responses:
+   *       200:
+   *         description: Token refreshed successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     accessToken:
+   *                       type: string
+   *                     refreshToken:
+   *                       type: string
+   *       401:
+   *         description: Refresh token required
+   *       403:
+   *         description: Invalid or expired refresh token
+   */
   router.post("/refresh-token", async (req, res) => {
     try {
       const { refreshToken } = req.body;
@@ -91,7 +258,36 @@ export const userRouter = (dependencies) => {
     }
   });
 
-  // LOGOUT USER (PUBLIC - refresh token required)
+  /**
+   * @swagger
+   * /users/logout:
+   *   post:
+   *     summary: Logout user
+   *     tags: [Users]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - refreshToken
+   *             properties:
+   *               refreshToken:
+   *                 type: string
+   *                 description: Refresh token to revoke
+   *     responses:
+   *       200:
+   *         description: Logout successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/SuccessResponse'
+   *       400:
+   *         description: Invalid refresh token
+   *       401:
+   *         description: Refresh token required
+   */
   router.post("/logout", async (req, res) => {
     try {
       const { refreshToken } = req.body;

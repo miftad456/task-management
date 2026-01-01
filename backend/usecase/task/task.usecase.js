@@ -20,8 +20,8 @@ export const getTaskUsecase = (taskRepository) => {
 };
 
 export const getAllTasksUsecase = (taskRepository) => {
-  const getAllTasks = async (userId) => {
-    return await taskRepository.findAllByUserId(userId);
+  const getAllTasks = async (userId, search = "") => {
+    return await taskRepository.findAllByUserId(userId, search);
   };
   return { getAllTasks };
 };
@@ -46,17 +46,41 @@ export const deleteTaskUsecase = (taskRepository) => {
   return { deleteTask };
 };
 
-export const trackTimeUsecase = (taskRepository) => {
-  const trackTime = async (taskId, minutes, userId) => {
+export const trackTimeUsecase = (taskRepository, timeLogRepository) => {
+  const trackTime = async (taskId, logData, userId) => {
+    const { minutes, note, startTime, endTime } = logData;
+
     if (!Number.isFinite(minutes)) throw new Error("Invalid minutes");
     if (minutes <= 0) throw new Error("Minutes must be positive");
+
     const task = await getTaskUsecase(taskRepository).getTask(taskId, userId);
-    // task is plain object from repo; compute new timeSpent and update
-    const newTime = (task.timeSpent || 0) + Number(minutes);
-    const updated = await taskRepository.update(taskId, { timeSpent: newTime });
-    return updated;
+    if (!task) throw new Error("Task not found");
+
+    // 1. Create the time log entry
+    await timeLogRepository.create({
+      taskId,
+      userId,
+      duration: Number(minutes),
+      note: note || "",
+      startTime: startTime || null,
+      endTime: endTime || null,
+    });
+
+    // 2. Update the task's total timeSpent (denormalized for performance)
+    const newTotalTime = (task.timeSpent || 0) + Number(minutes);
+    const updatedTask = await taskRepository.update(taskId, { timeSpent: newTotalTime });
+
+    return updatedTask;
   };
   return { trackTime };
+};
+
+export const getTimeLogsUsecase = (timeLogRepository) => {
+  const getTimeLogs = async (taskId) => {
+    if (!taskId) throw new Error("Task ID is required");
+    return await timeLogRepository.findByTaskId(taskId);
+  };
+  return { getTimeLogs };
 };
 /// New: Update Status
 // ---------------------
@@ -147,4 +171,61 @@ export const getUrgentTasksUsecase = ({ taskRepository }) => {
   return { getUrgentTasks };
 };
 
+export const uploadAttachmentUsecase = (taskRepository) => {
+  const uploadAttachment = async (taskId, fileData, userId) => {
+    const task = await getTaskUsecase(taskRepository).getTask(taskId, userId);
+    if (!task) throw new Error("Task not found");
 
+    const newAttachment = {
+      filename: fileData.filename,
+      originalName: fileData.originalname,
+      url: `/uploads/${fileData.filename}`,
+      mimetype: fileData.mimetype,
+      size: fileData.size,
+      uploadedAt: new Date(),
+    };
+
+    const updatedAttachments = [...(task.attachments || []), newAttachment];
+    const updatedTask = await taskRepository.update(taskId, { attachments: updatedAttachments });
+
+    return updatedTask;
+  };
+  return { uploadAttachment };
+};
+
+
+export const assignTaskUsecase = (taskRepository, teamRepository) => {
+  const assignTask = async (taskData, managerId) => {
+    const { userId, teamId } = taskData;
+    if (!userId || !teamId) throw new Error("User ID and Team ID are required for assignment");
+
+    // 1. Verify team exists and requester is the manager
+    const team = await teamRepository.findById(teamId);
+    if (!team) throw new Error("Team not found");
+    if (String(team.managerId) !== String(managerId)) {
+      throw new Error("Only the team manager can assign tasks");
+    }
+
+    // 2. Verify target user is a member of the team
+    if (!team.members.includes(String(userId))) {
+      throw new Error("Target user is not a member of this team");
+    }
+
+    // 3. Create the task with teamId
+    const task = new Task({
+      ...taskData,
+      assignedBy: managerId,
+      teamId: teamId, // Set teamId for team-based queries
+    });
+
+    return await taskRepository.create(task);
+  };
+  return { assignTask };
+};
+export const getAssignedTasksUsecase = (taskRepository) => {
+  const getAssignedTasks = async (userId) => {
+    if (!userId) throw new Error("User ID is required");
+    return await taskRepository.findAllAssignedToUserId(userId);
+  };
+  return { getAssignedTasks };
+};

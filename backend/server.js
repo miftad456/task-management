@@ -1,21 +1,45 @@
 import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 import { taskRouter } from "./api/router/task.router.js";
 import { userRouter } from "./api/router/user.router.js";
-import { teamRouter } from "./api/router/team.router.js"; // ✅ new
+import { teamRouter } from "./api/router/team.router.js";
+import { commentRouter } from "./api/router/comment.router.js";
+import { dashboardRouter } from "./api/router/dashboard.router.js";
+import { submissionRouter } from "./api/router/submission.router.js";
 import { dependencies } from "./api/dependencies.js";
+import { swaggerOptions } from "./swagger.config.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const createServer = () => {
   const app = express();
   app.use(express.json());
 
+  // Serve uploads folder as static
+  app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+  // Swagger Documentation
+  const swaggerSpec = swaggerJsdoc(swaggerOptions);
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'TaskManagement API Docs',
+  }));
+
   // Pass dependencies to routers
   app.use("/tasks", taskRouter(dependencies));
   app.use("/users", userRouter(dependencies));
-  app.use("/teams", teamRouter(dependencies)); // ✅ new
+  app.use("/teams", teamRouter(dependencies));
+  app.use("/dashboard", dashboardRouter(dependencies));
+  app.use("/comments", commentRouter(dependencies));
+  app.use("/submissions", submissionRouter(dependencies));
 
   // Health check
   app.get("/", (req, res) => {
-    res.send("Task Management API is running...");
+    res.send("Task Management API is running... Visit /api-docs for API documentation");
   });
 
   return app;

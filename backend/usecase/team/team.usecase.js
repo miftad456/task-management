@@ -124,9 +124,13 @@ export const teamUsecase = ({ teamRepository, userRepository }) => {
     return await teamRepository.requestLeave(teamId, userId);
   };
 
-  // 2️⃣ Manager fetches all leave requests for his team
-  const getLeaveRequests = async (teamId, managerId) => {
+  // 2️⃣ Manager fetches leave requests for his team
+  //    Optional `status` param allowed: pending|approved|rejected|all
+  const getLeaveRequests = async (teamId, managerId, status = "pending") => {
     if (!teamId || !managerId) throw new Error("Team ID and Manager ID required");
+
+    const allowed = ["pending", "approved", "rejected", "all"];
+    if (status && !allowed.includes(status)) throw new Error("Invalid status filter");
 
     const team = await teamRepository.findById(teamId);
     if (!team) throw new Error("Team not found");
@@ -135,8 +139,7 @@ export const teamUsecase = ({ teamRepository, userRepository }) => {
       throw new Error("Only the manager can view leave requests");
     }
 
-    // repository method name is getLeaveRequests (plural)
-    return await teamRepository.getLeaveRequests(teamId);
+    return await teamRepository.getLeaveRequests(teamId, status);
   };
 
   // 3️⃣ Manager approves leave

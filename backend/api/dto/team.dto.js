@@ -21,9 +21,10 @@ export const toTeamResponseDTO = (team, requesterId) => {
     };
   }
 
-  // Member sees members and other info but not the id or managerId
+  // Member sees members and other info including the id
   if (isMember) {
     return {
+      id: team.id,
       name: team.name,
       members: team.members,
       createdAt: team.createdAt,

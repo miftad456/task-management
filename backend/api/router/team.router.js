@@ -26,10 +26,11 @@ export const teamRouter = (dependencies) => {
     }
   });
 
-    // Add member to team
+  // Add member to team
   router.post(
     "/:teamId/member",
     authMiddleware,
+
     authorizeTeamManager(teamUsecase),
     async (req, res) => {
       try {
@@ -50,8 +51,6 @@ export const teamRouter = (dependencies) => {
       }
     }
   );
-  // before we adding to a member shouldn't we know that the member we are going to add is the user
-  // of our applicatiion if it's not we should say we couldn.t find the user with this username
 
   // Remove member from team
   router.delete(
@@ -161,9 +160,9 @@ export const teamRouter = (dependencies) => {
       try {
         const { teamId } = req.params;
         const managerId = req.user.id;
+        const status = req.query.status || "pending";
 
-        const requests = await teamUsecase.getLeaveRequests(teamId, managerId);
-
+        const requests = await teamUsecase.getLeaveRequests(teamId, managerId, status);
         res.json(success("Leave requests fetched", requests));
       } catch (err) {
         res.status(400).json(failure(err.message));

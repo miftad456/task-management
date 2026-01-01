@@ -28,3 +28,6 @@ build/
 
 # Optional: coverage folder if using testing tools
 coverage/
+
+# Uploads
+uploads/
