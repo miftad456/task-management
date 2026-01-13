@@ -9,19 +9,35 @@ export const createTaskUsecase = (taskRepository) => {
   return { createTask };
 };
 
-export const getTaskUsecase = (taskRepository) => {
+export const getTaskUsecase = (taskRepository, teamRepository) => {
   const getTask = async (id, userId) => {
     const task = await taskRepository.findById(id);
     if (!task) throw new Error("Task ID not found");
-    if (userId && task.userId !== userId) throw new Error("Not allowed to access this task");
+
+    // Access control:
+    // 1. Task owner (assignee) always has access
+    if (userId && String(task.userId) === String(userId)) return task;
+
+    // 2. If it's a team task, check if requester is manager or member
+    if (task.teamId && userId && teamRepository) {
+      const team = await teamRepository.findById(task.teamId);
+      if (team) {
+        const isManager = String(team.managerId.id || team.managerId) === String(userId);
+        const isMember = team.members.some(m => String(m.id || m) === String(userId));
+        if (isManager || isMember) return task;
+      }
+    }
+
+    if (userId) throw new Error("Not allowed to access this task");
     return task;
   };
   return { getTask };
 };
 
 export const getAllTasksUsecase = (taskRepository) => {
-  const getAllTasks = async (userId, search = "") => {
-    return await taskRepository.findAllByUserId(userId, search);
+  const getAllTasks = async (userId, search = "", status = "") => {
+    // Return all tasks (personal + assigned) to match dashboard counts
+    return await taskRepository.findAllByUserId(userId, search, status);
   };
   return { getAllTasks };
 };
@@ -93,6 +109,8 @@ export const updateStatusUsecase = (taskRepository) => {
     }
 
     const task = await getTaskUsecase(taskRepository).getTask(taskId, userId);
+
+
     const updatedTask = await taskRepository.update(taskId, { status: newStatus });
     return updatedTask;
   };
@@ -202,12 +220,19 @@ export const assignTaskUsecase = (taskRepository, teamRepository) => {
     // 1. Verify team exists and requester is the manager
     const team = await teamRepository.findById(teamId);
     if (!team) throw new Error("Team not found");
-    if (String(team.managerId) !== String(managerId)) {
+
+    const teamManagerId = team.managerId?.id || team.managerId;
+    if (String(teamManagerId) !== String(managerId)) {
       throw new Error("Only the team manager can assign tasks");
     }
 
     // 2. Verify target user is a member of the team
-    if (!team.members.includes(String(userId))) {
+    const isMember = team.members.some(m => {
+      const memberId = m?.id || m;
+      return String(memberId) === String(userId);
+    });
+
+    if (!isMember) {
       throw new Error("Target user is not a member of this team");
     }
 
@@ -228,4 +253,12 @@ export const getAssignedTasksUsecase = (taskRepository) => {
     return await taskRepository.findAllAssignedToUserId(userId);
   };
   return { getAssignedTasks };
+};
+
+export const deleteCompletedTasksUsecase = (taskRepository) => {
+  const deleteCompletedTasks = async (userId) => {
+    if (!userId) throw new Error("User ID is required");
+    return await taskRepository.deleteCompletedTasks(userId);
+  };
+  return { deleteCompletedTasks };
 };

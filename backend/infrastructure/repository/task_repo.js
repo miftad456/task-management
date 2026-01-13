@@ -45,10 +45,13 @@ export const taskRepository = {
     return map(doc);
   },
 
-  async findAllByUserId(userId, search = "") {
+  async findAllByUserId(userId, search = "", status = "") {
     const match = { userId };
     if (search) {
       match.title = { $regex: search, $options: "i" };
+    }
+    if (status) {
+      match.status = status;
     }
 
     // Use aggregation to sort null deadlines last by replacing them with a far future date
@@ -68,6 +71,36 @@ export const taskRepository = {
     ]);
 
     // Convert aggregation results back to objects that map() can handle
+    return docs.map(doc => map({ ...doc, _id: doc._id }));
+  },
+
+  async findPersonalTasksByUserId(userId, search = "", status = "") {
+    const match = {
+      userId,
+      $or: [{ assignedBy: null }, { assignedBy: { $exists: false } }]
+    };
+    if (search) {
+      match.title = { $regex: search, $options: "i" };
+    }
+    if (status) {
+      match.status = status;
+    }
+
+    const docs = await TaskModel.aggregate([
+      { $match: match },
+      {
+        $addFields: {
+          sortDeadline: { $ifNull: ["$deadline", new Date("9999-12-31")] }
+        }
+      },
+      {
+        $sort: {
+          sortDeadline: 1,
+          createdAt: -1
+        }
+      }
+    ]);
+
     return docs.map(doc => map({ ...doc, _id: doc._id }));
   },
 
@@ -96,12 +129,16 @@ export const taskRepository = {
   },
 
   async findAllAssignedToUserId(userId) {
-    // Find tasks where userId matches but assignedBy is NOT null and NOT the user themselves
-    const docs = await TaskModel.find({
-      userId,
-      assignedBy: { $exists: true, $ne: null }
-    }).sort({ deadline: 1 }).lean();
-    return docs.map(map);
+    // Find tasks where userId matches
+    const docs = await TaskModel.find({ userId })
+      .populate('teamId', 'name')
+      .sort({ deadline: 1 })
+      .lean();
+
+    // Filter tasks where assignedBy exists and is not null
+    const assignedTasks = docs.filter(doc => doc.assignedBy);
+
+    return assignedTasks.map(map);
   },
 
   async findAllByTeamId(teamId) {
@@ -163,4 +200,7 @@ export const taskRepository = {
     });
   },
 
+  async deleteCompletedTasks(userId) {
+    return await TaskModel.deleteMany({ userId, status: "completed" });
+  },
 };

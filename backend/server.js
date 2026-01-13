@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import swaggerJsdoc from "swagger-jsdoc";
@@ -15,21 +16,33 @@ import { swaggerOptions } from "./swagger.config.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// ... existing imports ...
+
 export const createServer = () => {
   const app = express();
+  app.use(cors());
   app.use(express.json());
 
-  // Serve uploads folder as static
+  // UPDATED: Serve the root folder so that 'uploads/filename.jpg' 
+  // from the DB works directly as http://localhost:3000/uploads/filename.jpg
+  app.use(express.static(path.join(__dirname)));
+
+  // Keep this as a backup if you prefer specific routing
   app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-  // Swagger Documentation
-  const swaggerSpec = swaggerJsdoc(swaggerOptions);
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-    customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'TaskManagement API Docs',
-  }));
+  try {
+    const specs = swaggerJsdoc(swaggerOptions);
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+      swaggerOptions: {
+        persistAuthorization: true, // Keeps your JWT token even after refresh
+      },
+    }));
+    console.log('✅ Swagger Docs available at http://localhost:3000/api-docs');
+  } catch (error) {
+    console.error('❌ Swagger initialization failed:', error.message);
+  }
 
-  // Pass dependencies to routers
+  // ... (rest of your router logic)
   app.use("/tasks", taskRouter(dependencies));
   app.use("/users", userRouter(dependencies));
   app.use("/teams", teamRouter(dependencies));
@@ -37,9 +50,8 @@ export const createServer = () => {
   app.use("/comments", commentRouter(dependencies));
   app.use("/submissions", submissionRouter(dependencies));
 
-  // Health check
   app.get("/", (req, res) => {
-    res.send("Task Management API is running... Visit /api-docs for API documentation");
+    res.send("Task Management API is running...");
   });
 
   return app;

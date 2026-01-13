@@ -8,6 +8,8 @@ export const teamUsecase = ({ teamRepository, userRepository }) => {
     if (!userId) throw new Error("User ID is required");
 
     const existingTeams = await teamRepository.findByManager(userId);
+    const duplicate = existingTeams.find(t => t.name.toLowerCase() === name.toLowerCase());
+    if (duplicate) throw new Error("You already have a team with this name");
 
     if (existingTeams.length === 0) {
       await userRepository.update(userId, { role: "manager" });
@@ -117,7 +119,12 @@ export const teamUsecase = ({ teamRepository, userRepository }) => {
     if (!team) throw new Error("Team not found");
 
     // Ensure member belongs to the team
-    if (!team.members.includes(String(userId))) {
+    const isMember = (team.members || []).some(m => {
+      const memberId = m?.id || m;
+      return String(memberId) === String(userId);
+    });
+
+    if (!isMember) {
       throw new Error("User is not a member of this team");
     }
 
@@ -135,7 +142,8 @@ export const teamUsecase = ({ teamRepository, userRepository }) => {
     const team = await teamRepository.findById(teamId);
     if (!team) throw new Error("Team not found");
 
-    if (String(team.managerId) !== String(managerId)) {
+    const teamManagerId = team.managerId?.id || team.managerId;
+    if (String(teamManagerId) !== String(managerId)) {
       throw new Error("Only the manager can view leave requests");
     }
 
@@ -152,7 +160,8 @@ export const teamUsecase = ({ teamRepository, userRepository }) => {
     const team = await teamRepository.findById(request.teamId);
     if (!team) throw new Error("Team not found");
 
-    if (String(team.managerId) !== String(managerId)) {
+    const teamManagerId = team.managerId?.id || team.managerId;
+    if (String(teamManagerId) !== String(managerId)) {
       throw new Error("Only the manager can approve leave");
     }
 
@@ -169,11 +178,31 @@ export const teamUsecase = ({ teamRepository, userRepository }) => {
     const team = await teamRepository.findById(request.teamId);
     if (!team) throw new Error("Team not found");
 
-    if (String(team.managerId) !== String(managerId)) {
+    const teamManagerId = team.managerId?.id || team.managerId;
+    if (String(teamManagerId) !== String(managerId)) {
       throw new Error("Only the manager can reject leave");
     }
 
     return await teamRepository.rejectLeave(requestId);
+  };
+
+  const deleteTeam = async (teamId, managerId) => {
+    if (!teamId || !managerId) throw new Error("Team ID and Manager ID required");
+
+    const team = await teamRepository.findById(teamId);
+    if (!team) throw new Error("Team not found");
+
+    const teamManagerId = team.managerId?.id || team.managerId;
+    if (String(teamManagerId) !== String(managerId)) {
+      throw new Error("Only the manager can delete the team");
+    }
+
+    return await teamRepository.delete(teamId);
+  };
+
+  const getManagerStats = async (managerId) => {
+    if (!managerId) throw new Error("Manager ID required");
+    return await teamRepository.getManagerStats(managerId);
   };
 
   return {
@@ -190,5 +219,7 @@ export const teamUsecase = ({ teamRepository, userRepository }) => {
     getLeaveRequests,
     approveLeave,
     rejectLeave,
+    deleteTeam,
+    getManagerStats,
   };
 };

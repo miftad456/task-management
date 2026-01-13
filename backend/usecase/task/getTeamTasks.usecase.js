@@ -10,9 +10,12 @@ export const getTeamTasksUsecase = (taskRepository, teamRepository) => {
         const team = await teamRepository.findById(teamId);
         if (!team) throw new Error("Team not found");
 
-        // 2. Verify requester is the team manager
-        if (String(team.managerId) !== String(managerId)) {
-            throw new Error("Only the team manager can view all team tasks");
+        // 2. Verify requester is the team manager or a member
+        const isManager = String(team.managerId.id || team.managerId) === String(managerId);
+        const isMember = team.members.some(m => String(m.id || m) === String(managerId));
+
+        if (!isManager && !isMember) {
+            throw new Error("Access denied: Only team members can view team tasks");
         }
 
         // 3. Get all tasks for this team

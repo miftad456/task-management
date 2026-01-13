@@ -1,11 +1,13 @@
 // src/DOMAIN/entity/team.entity.js
 
 export class Team {
-  constructor({ id, name, managerId, members = [], createdAt }) {
+  constructor({ id, name, managerId, members = [], bio = "", profilePicture = null, createdAt }) {
     this.id = id;
     this.name = name;
     this.managerId = managerId; // user ID of the manager
     this.members = members; // array of user IDs
+    this.bio = bio;
+    this.profilePicture = profilePicture;
     this.createdAt = createdAt || new Date();
   }
 
@@ -26,6 +28,8 @@ export class Team {
       name: this.name,
       managerId: this.managerId,
       members: this.members,
+      bio: this.bio,
+      profilePicture: this.profilePicture,
       createdAt: this.createdAt,
     };
   }

@@ -23,6 +23,7 @@ import {
   uploadAttachmentUsecase,
   assignTaskUsecase,
   getAssignedTasksUsecase,
+  deleteCompletedTasksUsecase,
 } from "../usecase/task/task.usecase.js";
 
 import { getTeamTasksUsecase } from "../usecase/task/getTeamTasks.usecase.js";
@@ -50,7 +51,7 @@ import {
 
 // Team usecases
 import { teamUsecase } from "../usecase/team/team.usecase.js";
-
+import { getTeamProfileUsecase, updateTeamProfileUsecase } from "../usecase/team/teamprofile.usecase.js";
 // Comment usecases
 import {
   createCommentUsecase,
@@ -78,7 +79,7 @@ export const dependencies = {
     createTaskUsecase: createTaskUsecase(taskRepository),
     updateTaskUsecase: updateTaskUsecase(taskRepository),
     deleteTaskUsecase: deleteTaskUsecase(taskRepository),
-    getTaskUsecase: getTaskUsecase(taskRepository),
+    getTaskUsecase: getTaskUsecase(taskRepository, teamRepository),
     getAllTasksUsecase: getAllTasksUsecase(taskRepository),
     trackTimeUsecase: trackTimeUsecase(taskRepository, timeLogRepository),
     updateStatusUsecase: updateStatusUsecase(taskRepository),
@@ -89,6 +90,7 @@ export const dependencies = {
     uploadAttachmentUsecase: uploadAttachmentUsecase(taskRepository),
     assignTaskUsecase: assignTaskUsecase(taskRepository, teamRepository),
     getAssignedTasksUsecase: getAssignedTasksUsecase(taskRepository),
+    deleteCompletedTasksUsecase: deleteCompletedTasksUsecase(taskRepository),
     submitTaskUsecase: submitTaskUsecase(taskRepository),
     reviewTaskUsecase: reviewTaskUsecase(taskRepository),
     getTeamTasksUsecase: getTeamTasksUsecase(taskRepository, teamRepository),
@@ -107,6 +109,8 @@ export const dependencies = {
 
     // Team usecases
     teamUsecase: teamUsecase({ teamRepository, userRepository }),
+    teamProfileUsecase: getTeamProfileUsecase({ teamRepository }),
+    updateTeamProfileUsecase: updateTeamProfileUsecase({ teamRepository }),
 
     // Comment usecases
     createCommentUsecase: createCommentUsecase(commentRepository, taskRepository, teamRepository),

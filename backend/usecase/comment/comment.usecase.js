@@ -11,10 +11,10 @@ export const createCommentUsecase = (commentRepository, taskRepository, teamRepo
             // Team task: verify user is manager or team member
             const team = await teamRepository.findById(task.teamId);
             if (!team) throw new Error("Team not found");
-            
-            const isManager = String(team.managerId) === String(userId);
-            const isMember = team.members.some(m => String(m) === String(userId));
-            
+
+            const isManager = String(team.managerId.id || team.managerId) === String(userId);
+            const isMember = team.members.some(m => String(m.id || m) === String(userId));
+
             if (!isManager && !isMember) {
                 throw new Error("Access denied: Only team members can comment on team tasks");
             }
@@ -47,10 +47,10 @@ export const getCommentsByTaskUsecase = (commentRepository, taskRepository, team
             // Team task: verify user is manager or team member
             const team = await teamRepository.findById(task.teamId);
             if (!team) throw new Error("Team not found");
-            
-            const isManager = String(team.managerId) === String(userId);
-            const isMember = team.members.some(m => String(m) === String(userId));
-            
+
+            const isManager = String(team.managerId.id || team.managerId) === String(userId);
+            const isMember = team.members.some(m => String(m.id || m) === String(userId));
+
             if (!isManager && !isMember) {
                 throw new Error("Access denied: Only team members can view comments on team tasks");
             }

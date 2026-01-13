@@ -13,11 +13,11 @@ export const toTaskResponseDTO = (task, commentCount = null) => {
     teamId: task.teamId,
     attachments: task.attachments || [],
   };
-  
+
   // Add comment count if provided
   if (commentCount !== null && commentCount !== undefined) {
     dto.commentCount = commentCount;
   }
-  
+
   return dto;
 };

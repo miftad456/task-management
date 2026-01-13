@@ -20,6 +20,25 @@ export const swaggerOptions = {
                 description: 'Test server',
             },
         ],
+        // ✅ Control order of tags here
+        tags: [
+            {
+                name: 'Users',
+                description: 'User authentication and profile management',
+            },
+            {
+                name: 'Tasks',
+                description: 'Task management operations',
+            },
+            {
+                name: 'Teams',
+                description: 'Team and member management',
+            },
+            {
+                name: 'Comments',
+                description: 'Task comments management',
+            },
+        ],
         components: {
             securitySchemes: {
                 bearerAuth: {
@@ -30,29 +49,15 @@ export const swaggerOptions = {
                 },
             },
             schemas: {
-                // User Schemas
+                // -------------------- Users --------------------
                 UserInput: {
                     type: 'object',
                     required: ['name', 'username', 'email', 'password'],
                     properties: {
-                        name: {
-                            type: 'string',
-                            example: 'John Doe',
-                        },
-                        username: {
-                            type: 'string',
-                            example: 'johndoe',
-                        },
-                        email: {
-                            type: 'string',
-                            format: 'email',
-                            example: 'john@example.com',
-                        },
-                        password: {
-                            type: 'string',
-                            minLength: 6,
-                            example: 'password123',
-                        },
+                        name: { type: 'string', example: 'John Doe' },
+                        username: { type: 'string', example: 'johndoe' },
+                        email: { type: 'string', format: 'email', example: 'john@example.com' },
+                        password: { type: 'string', minLength: 6, example: 'password123' },
                     },
                 },
                 UserResponse: {
@@ -87,7 +92,7 @@ export const swaggerOptions = {
                         },
                     },
                 },
-                // Task Schemas
+                // -------------------- Tasks --------------------
                 TaskInput: {
                     type: 'object',
                     required: ['title'],
@@ -115,7 +120,7 @@ export const swaggerOptions = {
                         timeSpent: { type: 'number' },
                         urgentBeforeMinutes: { type: 'number' },
                         commentCount: { type: 'number', description: 'Number of comments on this task' },
-                        attachments: { 
+                        attachments: {
                             type: 'array',
                             items: {
                                 type: 'object',
@@ -132,7 +137,7 @@ export const swaggerOptions = {
                         createdAt: { type: 'string', format: 'date-time' },
                     },
                 },
-                // TimeLog Schemas
+                // -------------------- TimeLogs --------------------
                 TimeLogInput: {
                     type: 'object',
                     required: ['minutes'],
@@ -156,13 +161,11 @@ export const swaggerOptions = {
                         createdAt: { type: 'string', format: 'date-time' },
                     },
                 },
-                // Team Schemas
+                // -------------------- Teams --------------------
                 TeamInput: {
                     type: 'object',
                     required: ['name'],
-                    properties: {
-                        name: { type: 'string', example: 'Engineering Team' },
-                    },
+                    properties: { name: { type: 'string', example: 'Engineering Team' } },
                 },
                 TeamResponse: {
                     type: 'object',
@@ -174,17 +177,12 @@ export const swaggerOptions = {
                         createdAt: { type: 'string', format: 'date-time' },
                     },
                 },
-                // Comment Schemas
+                // -------------------- Comments --------------------
                 CommentInput: {
                     type: 'object',
                     required: ['content'],
                     properties: {
-                        content: { 
-                            type: 'string', 
-                            minLength: 1,
-                            maxLength: 1000,
-                            example: 'This is a helpful comment' 
-                        },
+                        content: { type: 'string', minLength: 1, maxLength: 1000, example: 'This is a helpful comment' },
                     },
                 },
                 CommentResponse: {
@@ -206,7 +204,7 @@ export const swaggerOptions = {
                         updatedAt: { type: 'string', format: 'date-time' },
                     },
                 },
-                // Common Response Schemas
+                // -------------------- Common Responses --------------------
                 SuccessResponse: {
                     type: 'object',
                     properties: {
@@ -224,11 +222,7 @@ export const swaggerOptions = {
                 },
             },
         },
-        security: [
-            {
-                bearerAuth: [],
-            },
-        ],
+        security: [{ bearerAuth: [] }],
     },
-    apis: ['./api/router/*.js', './api/router/swagger.docs.js'], // Path to the API routes
+    apis: ['./api/router/*.js', './api/router/swagger.docs.js'],
 };

@@ -19,8 +19,19 @@ export const updateProfileUsecase = (userRepository) => {
 };
 
 export const getProfileUsecase = (userRepository) => {
-    const execute = async (userId) => {
-        const user = await userRepository.findById(userId);
+    const execute = async (identifier) => {
+        let user;
+
+        // Try finding by ID first if it looks like a valid ObjectId
+        if (identifier.match(/^[0-9a-fA-F]{24}$/)) {
+            user = await userRepository.findById(identifier);
+        }
+
+        // If not found by ID, try finding by username
+        if (!user) {
+            user = await userRepository.findByUsername(identifier);
+        }
+
         if (!user) throw new Error("User not found");
 
         // Return profile-related info (excluding sensitive data like password)

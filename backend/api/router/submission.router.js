@@ -1,7 +1,15 @@
+// backend/api/router/submission.router.js
 import express from "express";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { success, failure } from "../utilities/response.js";
 import { toTaskResponseDTO } from "../dto/task.dto.js";
+
+/**
+ * @swagger
+ * tags:
+ *   - name: Submissions
+ *     description: Task submission and review process
+ */
 
 export const submissionRouter = (dependencies) => {
     const router = express.Router();
@@ -10,7 +18,34 @@ export const submissionRouter = (dependencies) => {
         reviewTaskUsecase,
     } = dependencies.usecases;
 
-    // Submit Task (protected)
+    /**
+     * @swagger
+     * /submissions/task/{id}:
+     *   post:
+     *     summary: Submit a task for review (Assigned member only)
+     *     tags: [Submissions]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Task ID
+     *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               note:
+     *                 type: string
+     *                 example: Finished the report, please review.
+     *     responses:
+     *       200:
+     *         description: Task submitted successfully
+     */
     router.post("/task/:id", authMiddleware, async (req, res) => {
         try {
             const { note } = req.body || {};
@@ -21,7 +56,39 @@ export const submissionRouter = (dependencies) => {
         }
     });
 
-    // Review Task (protected - Manager only)
+    /**
+     * @swagger
+     * /submissions/task/{id}/review:
+     *   put:
+     *     summary: Review a submitted task (Manager only)
+     *     tags: [Submissions]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Task ID
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required: [action]
+     *             properties:
+     *               action:
+     *                 type: string
+     *                 enum: [approve, reject]
+     *               note:
+     *                 type: string
+     *                 example: Great work, approved.
+     *     responses:
+     *       200:
+     *         description: Review completed
+     */
     router.put("/task/:id/review", authMiddleware, async (req, res) => {
         try {
             const { action, note } = req.body || {};

@@ -11,7 +11,8 @@ export const authorizeTeamManager = (teamUsecase) => {
       const team = await teamUsecase.getTeamById(teamId);
       if (!team) return res.status(404).json(failure("Team not found"));
 
-      if (String(team.managerId) !== String(req.user?.id)) {
+      const managerId = team.managerId?.id || team.managerId;
+      if (String(managerId) !== String(req.user?.id)) {
         return res.status(403).json(failure("Forbidden: only team manager can perform this action"));
       }
 

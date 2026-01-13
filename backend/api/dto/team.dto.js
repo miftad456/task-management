@@ -1,39 +1,37 @@
-// backend/api/dto/team.dto.js
 export const toTeamResponseDTO = (team, requesterId) => {
   if (!team) return null;
 
-  const isManager = String(team.managerId) === String(requesterId);
-  const isMember = (team.members || []).some(m => String(m) === String(requesterId));
+  // Normalize managerId and check permissions
+  const managerId = team.managerId?.id || team.managerId;
+  const isManager = String(managerId) === String(requesterId);
 
-  const base = {
-    name: team.name,
-    createdAt: team.createdAt,
+  const isMember = (team.members || []).some(m => {
+    const memberId = m?.id || m;
+    return String(memberId) === String(requesterId);
+  });
+
+  // These are the new fields that were missing from your previous DTO
+  const profileData = {
+    bio: team.bio || "",
+    profilePicture: team.profilePicture || null,
   };
 
-  // Manager sees everything including id and managerId
-  if (isManager) {
+  // Manager and Members get the full data set
+  if (isManager || isMember) {
     return {
       id: team.id,
       name: team.name,
       managerId: team.managerId,
       members: team.members,
       createdAt: team.createdAt,
+      ...profileData // Injects bio and profilePicture
     };
   }
 
-  // Member sees members and other info including the id
-  if (isMember) {
-    return {
-      id: team.id,
-      name: team.name,
-      members: team.members,
-      createdAt: team.createdAt,
-    };
-  }
-
-  // Non-member sees only minimal public fields (no id, no members)
+  // Non-members (Public View)
   return {
     name: team.name,
     createdAt: team.createdAt,
+    ...profileData // Injects bio and profilePicture
   };
 };
