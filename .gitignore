@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+dist/
+build/
+*.log
+.DS_Store
+debug_tasks.js
+backend/debug_tasks.js
+frontend/node_modules/
+backend/node_modules/
+coverage/
