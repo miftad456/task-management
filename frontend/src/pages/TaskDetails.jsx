@@ -30,6 +30,7 @@ const TaskDetails = () => {
     const [error, setError] = useState(null);
     const [showSubmitDialog, setShowSubmitDialog] = useState(false);
     const [showReviewDialog, setShowReviewDialog] = useState(false);
+    const [submissionLink, setSubmissionLink] = useState('');
     const [submissionNote, setSubmissionNote] = useState('');
     const [reviewAction, setReviewAction] = useState('');
     const [reviewNote, setReviewNote] = useState('');
@@ -84,9 +85,10 @@ const TaskDetails = () => {
     const handleSubmitTask = async () => {
         setSubmitting(true);
         try {
-            const updatedTask = await submissionService.submitTask(taskId, submissionNote);
+            const updatedTask = await submissionService.submitTask(taskId, submissionLink, submissionNote);
             setTask(updatedTask);
             setShowSubmitDialog(false);
+            setSubmissionLink('');
             setSubmissionNote('');
             alert('Task submitted for review successfully!');
         } catch (err) {
@@ -193,7 +195,9 @@ const TaskDetails = () => {
                                 >
                                     <option value="pending">Pending</option>
                                     <option value="in-progress">In Progress</option>
-                                    <option value="completed">Completed</option>
+                                    {(!task.assignedBy || task.assignedBy === user?.id) && (
+                                        <option value="completed">Completed</option>
+                                    )}
                                 </select>
                             </div>
                         )}
@@ -245,9 +249,32 @@ const TaskDetails = () => {
                             <AlertCircle size={20} className="text-yellow-500" />
                             <h3 className="text-lg font-bold text-white">Review Submission</h3>
                         </div>
-                        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4">
-                            <p className="text-yellow-500 text-sm mb-4">This task has been submitted for your review.</p>
-                            <div className="flex gap-3">
+                        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-6 space-y-4">
+                            <p className="text-yellow-500 text-sm font-medium">This task has been submitted for your review.</p>
+
+                            {task.submissionLink && (
+                                <div className="space-y-1">
+                                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Submission Link</p>
+                                    <a
+                                        href={task.submissionLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-brand-primary hover:underline break-all flex items-center gap-2"
+                                    >
+                                        <FileText size={16} />
+                                        {task.submissionLink}
+                                    </a>
+                                </div>
+                            )}
+
+                            {task.submissionNote && (
+                                <div className="space-y-1">
+                                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Member Note</p>
+                                    <p className="text-slate-300 text-sm italic">"{task.submissionNote}"</p>
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 pt-2">
                                 <button
                                     onClick={() => { setReviewAction('approve'); setShowReviewDialog(true); }}
                                     className="flex-1 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
@@ -267,12 +294,33 @@ const TaskDetails = () => {
                     </div>
                 )}
 
-                {/* Submission Status Display */}
+                {/* Submission Details for Member */}
                 {task.status === 'submitted' && !canReviewTask && (
-                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4">
+                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6 space-y-4">
                         <div className="flex items-center gap-2 text-blue-500">
                             <Clock size={18} />
                             <p className="font-semibold">Task submitted and awaiting review</p>
+                        </div>
+                        {task.submissionLink && (
+                            <div className="space-y-1">
+                                <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Your Submission Link</p>
+                                <a href={task.submissionLink} target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline break-all block text-sm">
+                                    {task.submissionLink}
+                                </a>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Manager Feedback Display */}
+                {task.managerFeedback && (
+                    <div className="space-y-4 pt-4 border-t border-white/10">
+                        <div className="flex items-center gap-2">
+                            <ThumbsUp size={20} className="text-green-500" />
+                            <h3 className="text-lg font-bold text-white">Manager Feedback</h3>
+                        </div>
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                            <p className="text-slate-300 italic">"{task.managerFeedback}"</p>
                         </div>
                     </div>
                 )}
@@ -332,13 +380,28 @@ const TaskDetails = () => {
                         className="bg-[#0f172a] border border-white/10 rounded-3xl p-6 max-w-md w-full space-y-4"
                     >
                         <h3 className="text-xl font-bold text-white">Submit Task for Review</h3>
-                        <p className="text-slate-400 text-sm">Add an optional note for the reviewer.</p>
-                        <textarea
-                            value={submissionNote}
-                            onChange={(e) => setSubmissionNote(e.target.value)}
-                            placeholder="Add a note (optional)..."
-                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 focus:outline-none focus:border-brand-primary/50 focus:ring-4 focus:ring-brand-primary/10 transition-all text-white placeholder:text-slate-600 resize-none min-h-[100px]"
-                        />
+                        <p className="text-slate-400 text-sm">Provide a link to your work and an optional note.</p>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Submission Link</label>
+                                <input
+                                    type="url"
+                                    value={submissionLink}
+                                    onChange={(e) => setSubmissionLink(e.target.value)}
+                                    placeholder="https://..."
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 focus:outline-none focus:border-brand-primary/50 focus:ring-4 focus:ring-brand-primary/10 transition-all text-white placeholder:text-slate-600"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Note (Optional)</label>
+                                <textarea
+                                    value={submissionNote}
+                                    onChange={(e) => setSubmissionNote(e.target.value)}
+                                    placeholder="Add a note..."
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 focus:outline-none focus:border-brand-primary/50 focus:ring-4 focus:ring-brand-primary/10 transition-all text-white placeholder:text-slate-600 resize-none min-h-[100px]"
+                                />
+                            </div>
+                        </div>
                         <div className="flex gap-3">
                             <button
                                 onClick={handleSubmitTask}
@@ -349,7 +412,7 @@ const TaskDetails = () => {
                                 Submit
                             </button>
                             <button
-                                onClick={() => { setShowSubmitDialog(false); setSubmissionNote(''); }}
+                                onClick={() => { setShowSubmitDialog(false); setSubmissionLink(''); setSubmissionNote(''); }}
                                 disabled={submitting}
                                 className="px-4 py-3 bg-white/5 hover:bg-white/10 text-slate-400 rounded-xl font-semibold transition-all"
                             >

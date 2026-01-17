@@ -39,6 +39,9 @@ export const submissionRouter = (dependencies) => {
      *           schema:
      *             type: object
      *             properties:
+     *               link:
+     *                 type: string
+     *                 example: https://github.com/user/repo/pull/1
      *               note:
      *                 type: string
      *                 example: Finished the report, please review.
@@ -48,8 +51,8 @@ export const submissionRouter = (dependencies) => {
      */
     router.post("/task/:id", authMiddleware, async (req, res) => {
         try {
-            const { note } = req.body || {};
-            const task = await submitTaskUsecase.submitTask(req.params.id, req.user?.id, note);
+            const { link, note } = req.body || {};
+            const task = await submitTaskUsecase.submitTask(req.params.id, req.user?.id, link, note);
             res.json(success("Task submitted for review", toTaskResponseDTO(task)));
         } catch (err) {
             res.status(400).json(failure(err.message));

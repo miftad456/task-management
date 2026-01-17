@@ -1,5 +1,5 @@
 export const submitTaskUsecase = (taskRepository) => {
-    const submitTask = async (taskId, userId, submissionNote = "") => {
+    const submitTask = async (taskId, userId, submissionLink = "", submissionNote = "") => {
         const task = await taskRepository.findById(taskId);
         if (!task) throw new Error("Task not found");
 
@@ -12,8 +12,12 @@ export const submitTaskUsecase = (taskRepository) => {
             throw new Error("Task is already completed");
         }
 
-        // Update status to submitted
-        const updatedTask = await taskRepository.update(taskId, { status: "submitted" });
+        // Update status to submitted and add link/note
+        const updatedTask = await taskRepository.update(taskId, {
+            status: "submitted",
+            submissionLink,
+            submissionNote
+        });
 
         return updatedTask;
     };
@@ -43,7 +47,10 @@ export const reviewTaskUsecase = (taskRepository) => {
             throw new Error("Invalid review action. Use 'approve' or 'reject'");
         }
 
-        const updatedTask = await taskRepository.update(taskId, { status: newStatus });
+        const updatedTask = await taskRepository.update(taskId, {
+            status: newStatus,
+            managerFeedback: reviewNote
+        });
 
         return updatedTask;
     };

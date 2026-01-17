@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckSquare, Search, Filter, Clock, CheckCircle2, AlertCircle, MoreVertical, Loader2, Calendar } from 'lucide-react';
+import { CheckSquare, Search, Filter, Clock, CheckCircle2, AlertCircle, MoreVertical, Loader2, Calendar, Trash2 } from 'lucide-react';
 import taskService from '../services/task.service';
 import useAuthStore from '../store/useAuthStore';
 
@@ -37,6 +37,16 @@ const Tasks = () => {
             fetchTasks();
         } catch (error) {
             alert('Failed to update status: ' + error.message);
+        }
+    };
+
+    const handleDeleteTask = async (taskId) => {
+        if (!window.confirm('Are you sure you want to delete this task?')) return;
+        try {
+            await taskService.deleteTask(taskId);
+            fetchTasks();
+        } catch (error) {
+            alert('Failed to delete task: ' + error.message);
         }
     };
 
@@ -88,8 +98,8 @@ const Tasks = () => {
                             key={f}
                             onClick={() => setFilter(f)}
                             className={`px-5 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all whitespace-nowrap ${filter === f
-                                    ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20'
-                                    : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
+                                ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20'
+                                : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
                                 }`}
                         >
                             {f.replace('-', ' ')}
@@ -137,8 +147,17 @@ const Tasks = () => {
                                     >
                                         <option value="pending">Pending</option>
                                         <option value="in-progress">In Progress</option>
-                                        <option value="completed">Completed</option>
+                                        {(!task.assignedBy || task.assignedBy === user?.id) && (
+                                            <option value="completed">Completed</option>
+                                        )}
                                     </select>
+                                    <button
+                                        onClick={() => handleDeleteTask(task.id)}
+                                        className="p-2 hover:bg-red-500/10 rounded-xl text-slate-500 hover:text-red-500 transition-all"
+                                        title="Delete Task"
+                                    >
+                                        <Trash2 size={20} />
+                                    </button>
                                     <button className="p-2 hover:bg-white/5 rounded-xl text-slate-500 hover:text-white transition-all">
                                         <MoreVertical size={20} />
                                     </button>

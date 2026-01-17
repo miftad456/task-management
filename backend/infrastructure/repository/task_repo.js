@@ -16,6 +16,9 @@ const map = (doc) => {
     assignedBy: obj.assignedBy || null,
     teamId: obj.teamId || null,
     attachments: obj.attachments || [],
+    submissionLink: obj.submissionLink || "",
+    submissionNote: obj.submissionNote || "",
+    managerFeedback: obj.managerFeedback || "",
     createdAt: obj.createdAt,
   };
 };
@@ -34,6 +37,9 @@ export const taskRepository = {
       assignedBy: taskEntity.assignedBy || null,
       teamId: taskEntity.teamId || null,
       attachments: taskEntity.attachments || [],
+      submissionLink: taskEntity.submissionLink || "",
+      submissionNote: taskEntity.submissionNote || "",
+      managerFeedback: taskEntity.managerFeedback || "",
     };
     const newTask = await TaskModel.create(toSave);
     return map(newTask);

@@ -36,8 +36,8 @@ export const getTaskUsecase = (taskRepository, teamRepository) => {
 
 export const getAllTasksUsecase = (taskRepository) => {
   const getAllTasks = async (userId, search = "", status = "") => {
-    // Return all tasks (personal + assigned) to match dashboard counts
-    return await taskRepository.findAllByUserId(userId, search, status);
+    // Return only personal tasks (where assignedBy is null)
+    return await taskRepository.findPersonalTasksByUserId(userId, search, status);
   };
   return { getAllTasks };
 };
@@ -46,16 +46,45 @@ export const updateTaskUsecase = (taskRepository) => {
   const updateTask = async (id, updates, userId) => {
     const task = await getTaskUsecase(taskRepository).getTask(id, userId);
     if (!task) throw new Error("Task not found");
+
+    // Restriction: Assigned members cannot mark assigned tasks as completed
+    if (updates.status === "completed" && task.assignedBy && String(task.userId) === String(userId)) {
+      throw new Error("Assigned tasks must be submitted for review to be marked as completed");
+    }
+
     const updatedTask = await taskRepository.update(id, updates);
     return updatedTask;
   };
   return { updateTask };
 };
 
-export const deleteTaskUsecase = (taskRepository) => {
+export const deleteTaskUsecase = (taskRepository, teamRepository) => {
   const deleteTask = async (id, userId) => {
-    const task = await getTaskUsecase(taskRepository).getTask(id, userId);
+    const task = await getTaskUsecase(taskRepository, teamRepository).getTask(id, userId);
     if (!task) throw new Error("Task not found");
+
+    // Access Control for Deletion:
+    // 1. Personal tasks: Only the owner can delete
+    const isOwner = String(task.userId) === String(userId);
+
+    // 2. Assigned tasks: Only the assigner OR the team manager can delete
+    let isManagerOrAssigner = false;
+    if (task.assignedBy) {
+      const isAssigner = String(task.assignedBy) === String(userId);
+      let isTeamManager = false;
+      if (task.teamId && teamRepository) {
+        const team = await teamRepository.findById(task.teamId);
+        if (team) {
+          isTeamManager = String(team.managerId.id || team.managerId) === String(userId);
+        }
+      }
+      isManagerOrAssigner = isAssigner || isTeamManager;
+    }
+
+    if (!isOwner && !isManagerOrAssigner) {
+      throw new Error("Not allowed to delete this task");
+    }
+
     await taskRepository.delete(id);
     return true;
   };
@@ -110,6 +139,10 @@ export const updateStatusUsecase = (taskRepository) => {
 
     const task = await getTaskUsecase(taskRepository).getTask(taskId, userId);
 
+    // Restriction: Assigned members cannot mark assigned tasks as completed
+    if (newStatus === "completed" && task.assignedBy && String(task.userId) === String(userId)) {
+      throw new Error("Assigned tasks must be submitted for review to be marked as completed");
+    }
 
     const updatedTask = await taskRepository.update(taskId, { status: newStatus });
     return updatedTask;

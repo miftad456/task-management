@@ -184,6 +184,20 @@ const TeamDetails = () => {
 
     const isManager = team && user && String(team.managerId?.id) === String(user.id);
 
+    // Delete task
+    const handleDeleteTask = async (e, taskId) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!window.confirm('Are you sure you want to delete this task?')) return;
+        try {
+            await taskService.deleteTask(taskId);
+            alert('Task deleted successfully.');
+            fetchTeamDetails();
+        } catch (error) {
+            alert('Failed to delete task: ' + error.message);
+        }
+    };
+
     return (
         <div className="space-y-10">
             {/* Header */}
@@ -428,6 +442,15 @@ const TeamDetails = () => {
                                 <span className={`text-xs ${task.status === 'completed' ? 'text-green-500' : 'text-slate-400'}`}>
                                     {task.status.replace('-', ' ')}
                                 </span>
+                                {isManager && (
+                                    <button
+                                        onClick={(e) => handleDeleteTask(e, task.id)}
+                                        className="p-1.5 text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all ml-2"
+                                        title="Delete Task"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                )}
                             </div>
                             <h4 className="text-white font-bold mb-2 line-clamp-1 group-hover:text-brand-primary transition-colors">
                                 {task.title}

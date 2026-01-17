@@ -78,7 +78,7 @@ export const dependencies = {
     // Task usecases
     createTaskUsecase: createTaskUsecase(taskRepository),
     updateTaskUsecase: updateTaskUsecase(taskRepository),
-    deleteTaskUsecase: deleteTaskUsecase(taskRepository),
+    deleteTaskUsecase: deleteTaskUsecase(taskRepository, teamRepository),
     getTaskUsecase: getTaskUsecase(taskRepository, teamRepository),
     getAllTasksUsecase: getAllTasksUsecase(taskRepository),
     trackTimeUsecase: trackTimeUsecase(taskRepository, timeLogRepository),
