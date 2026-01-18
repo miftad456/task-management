@@ -9,7 +9,7 @@ export const getTeamMemberTasksUsecase = (taskRepository, teamRepository) => {
 
         // 1. Verify team exists
         const team = await teamRepository.findById(teamId);
-        if (!team) throw new Error("Team not found");
+        if (!team) throw new Error("We cannot find this team");
 
         // 2. Verify requester is either the team manager or a team member
         const managerId = team.managerId?.id || team.managerId;

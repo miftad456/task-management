@@ -12,7 +12,7 @@ export const createTaskUsecase = (taskRepository) => {
 export const getTaskUsecase = (taskRepository, teamRepository) => {
   const getTask = async (id, userId) => {
     const task = await taskRepository.findById(id);
-    if (!task) throw new Error("Task ID not found");
+    if (!task) throw new Error("We cannot find this task");
 
     // Access control:
     // 1. Task owner (assignee) always has access
@@ -46,7 +46,7 @@ export const getAllTasksUsecase = (taskRepository) => {
 export const updateTaskUsecase = (taskRepository) => {
   const updateTask = async (id, updates, userId) => {
     const task = await getTaskUsecase(taskRepository).getTask(id, userId);
-    if (!task) throw new Error("Task not found");
+    if (!task) throw new Error("We cannot find this task");
 
     // Restriction: Assigned members cannot mark assigned tasks as completed
     if (updates.status === "completed" && task.assignedBy && String(task.userId) === String(userId)) {
@@ -62,7 +62,7 @@ export const updateTaskUsecase = (taskRepository) => {
 export const deleteTaskUsecase = (taskRepository, teamRepository) => {
   const deleteTask = async (id, userId) => {
     const task = await getTaskUsecase(taskRepository, teamRepository).getTask(id, userId);
-    if (!task) throw new Error("Task not found");
+    if (!task) throw new Error("We cannot find this task");
 
     // Access Control for Deletion:
     // 1. Personal tasks: Only the owner can delete
@@ -100,7 +100,7 @@ export const trackTimeUsecase = (taskRepository, timeLogRepository) => {
     if (minutes <= 0) throw new Error("Minutes must be positive");
 
     const task = await getTaskUsecase(taskRepository).getTask(taskId, userId);
-    if (!task) throw new Error("Task not found");
+    if (!task) throw new Error("We cannot find this task");
 
     // 1. Create the time log entry
     await timeLogRepository.create({
@@ -226,7 +226,7 @@ export const getUrgentTasksUsecase = ({ taskRepository }) => {
 export const uploadAttachmentUsecase = (taskRepository) => {
   const uploadAttachment = async (taskId, fileData, userId) => {
     const task = await getTaskUsecase(taskRepository).getTask(taskId, userId);
-    if (!task) throw new Error("Task not found");
+    if (!task) throw new Error("We cannot find this task");
 
     const newAttachment = {
       filename: fileData.filename,
@@ -253,7 +253,7 @@ export const assignTaskUsecase = (taskRepository, teamRepository, notificationRe
 
     // 1. Verify team exists and requester is the manager
     const team = await teamRepository.findById(teamId);
-    if (!team) throw new Error("Team not found");
+    if (!team) throw new Error("We cannot find this team");
 
     const teamManagerId = team.managerId?.id || team.managerId;
     if (String(teamManagerId) !== String(managerId)) {

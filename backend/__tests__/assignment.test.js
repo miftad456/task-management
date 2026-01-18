@@ -147,7 +147,7 @@ describe('Task Assignment and Submission API', () => {
 
             expect(response.body.success).toBe(true);
             expect(response.body.data.length).toBeGreaterThan(0);
-            expect(response.body.data[0].assignedBy).toBe(manager.id);
+            expect(response.body.data[0].assignedBy.id || response.body.data[0].assignedBy._id).toBe(manager.id);
             expect(response.body.data[0].userId).toBe(member.id);
         });
 

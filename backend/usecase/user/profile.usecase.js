@@ -10,7 +10,7 @@ export const updateProfileUsecase = (userRepository) => {
         if (profilePicture !== undefined) updateData.profilePicture = profilePicture;
 
         const updatedUser = await userRepository.update(userId, updateData);
-        if (!updatedUser) throw new Error("User not found");
+        if (!updatedUser) throw new Error("We cannot find this user");
 
         return updatedUser;
     };
@@ -32,7 +32,7 @@ export const getProfileUsecase = (userRepository) => {
             user = await userRepository.findByUsername(identifier);
         }
 
-        if (!user) throw new Error("User not found");
+        if (!user) throw new Error("We cannot find this user");
 
         // Return profile-related info (excluding sensitive data like password)
         return {

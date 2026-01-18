@@ -92,7 +92,7 @@ export const teamRouter = (dependencies) => {
       const { teamId } = req.params;
       const { username, userId } = req.body;
       const identifier = userId || username;
-      if (!identifier) return res.status(400).json(failure("username or userId is required"));
+      if (!identifier) return res.status(400).json(failure("Please provide a username or user ID"));
       const { team: updatedTeam, addedUser } = await teamUsecase.addMember(teamId, identifier);
       res.json(success("Member added", { username: addedUser.username, team: toTeamResponseDTO(updatedTeam, req.user.id) }));
     } catch (err) {

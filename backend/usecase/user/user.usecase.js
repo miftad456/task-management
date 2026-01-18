@@ -12,10 +12,10 @@ export const registerUserUsecase = ({ userRepository, passwordService }) => {
 export const loginUserUsecase = ({ userRepository, passwordService, jwtService }) => {
   const loginUser = async (username, password) => {
     const user = await userRepository.findByUsername(username);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error("Invalid credentials");
 
     const isValid = await passwordService.comparePassword(password, user.password);
-    if (!isValid) throw new Error("Invalid password");
+    if (!isValid) throw new Error("Invalid credentials");
 
     const accessToken = await jwtService.generateToken({
       userId: user.id,
@@ -42,7 +42,7 @@ export const loginUserUsecase = ({ userRepository, passwordService, jwtService }
 export const getUserUsecase = ({ userRepository }) => {
   const getUser = async (userId) => {
     const user = await userRepository.findById(userId);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error("We cannot find this user");
     return user;
   };
   return { getUser };
@@ -51,7 +51,7 @@ export const getUserUsecase = ({ userRepository }) => {
 export const updateUserUsecase = ({ userRepository }) => {
   const updateUser = async (userId, updates) => {
     const updatedUser = await userRepository.update(userId, updates);
-    if (!updatedUser) throw new Error("User not found");
+    if (!updatedUser) throw new Error("We cannot find this user");
     return updatedUser;
   };
   return { updateUser };

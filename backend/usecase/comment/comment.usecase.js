@@ -4,14 +4,14 @@ export const createCommentUsecase = (commentRepository, taskRepository, teamRepo
     const createComment = async (taskId, content, userId) => {
         // 1. Verify task exists
         const task = await taskRepository.findById(taskId);
-        if (!task) throw new Error("Task not found");
+        if (!task) throw new Error("We cannot find this task");
 
         let team = null;
         // 2. Access control based on task type
         if (task.teamId) {
             // Team task: verify user is manager or team member
             team = await teamRepository.findById(task.teamId);
-            if (!team) throw new Error("Team not found");
+            if (!team) throw new Error("We cannot find this team");
 
             const isManager = String(team.managerId.id || team.managerId) === String(userId);
             const isMember = team.members.some(m => String(m.id || m) === String(userId));
@@ -71,13 +71,13 @@ export const getCommentsByTaskUsecase = (commentRepository, taskRepository, team
     const getComments = async (taskId, userId) => {
         // 1. Verify task exists
         const task = await taskRepository.findById(taskId);
-        if (!task) throw new Error("Task not found");
+        if (!task) throw new Error("We cannot find this task");
 
         // 2. Access control for viewing comments
         if (task.teamId) {
             // Team task: verify user is manager or team member
             const team = await teamRepository.findById(task.teamId);
-            if (!team) throw new Error("Team not found");
+            if (!team) throw new Error("We cannot find this team");
 
             const isManager = String(team.managerId.id || team.managerId) === String(userId);
             const isMember = team.members.some(m => String(m.id || m) === String(userId));
@@ -100,7 +100,7 @@ export const getCommentsByTaskUsecase = (commentRepository, taskRepository, team
 export const updateCommentUsecase = (commentRepository) => {
     const updateComment = async (commentId, content, userId) => {
         const comment = await commentRepository.findById(commentId);
-        if (!comment) throw new Error("Comment not found");
+        if (!comment) throw new Error("We cannot find this comment");
 
         // Only comment owner can update
         if (String(comment.userId) !== String(userId)) {
@@ -115,7 +115,7 @@ export const updateCommentUsecase = (commentRepository) => {
 export const deleteCommentUsecase = (commentRepository) => {
     const deleteComment = async (commentId, userId) => {
         const comment = await commentRepository.findById(commentId);
-        if (!comment) throw new Error("Comment not found");
+        if (!comment) throw new Error("We cannot find this comment");
 
         // Only comment owner can delete
         if (String(comment.userId) !== String(userId)) {
