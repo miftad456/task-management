@@ -198,6 +198,7 @@ export const teamRepository = {
 
   delete: async (id) => {
     await TeamLeaveRequestModel.deleteMany({ teamId: id });
+    await TaskModel.deleteMany({ teamId: id });
     return await TeamModel.findByIdAndDelete(id);
   },
 

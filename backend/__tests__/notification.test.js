@@ -145,7 +145,6 @@ describe('Notification API Endpoints', () => {
                 .send(taskData);
 
             taskId = taskResponse.body.data.id;
-            console.log('DEBUG TASKID:', taskId);
 
             // Member submits task
             await request(app)
@@ -156,13 +155,11 @@ describe('Notification API Endpoints', () => {
         });
 
         it('should create a notification when a task is approved', async () => {
-            const res = await request(app)
+            await request(app)
                 .put(`/submissions/task/${taskId}/review`)
                 .set('Authorization', `Bearer ${managerToken}`)
-                .send({ action: 'approve', note: 'Good job' });
-
-            if (res.status !== 200) throw new Error(`DEBUG APPROVE: ${JSON.stringify(res.body)}`);
-            expect(res.status).toBe(200);
+                .send({ action: 'approve', note: 'Good job' })
+                .expect(200);
 
             const notifications = await NotificationModel.find({ recipientId: member._id, type: 'task_approved' });
             expect(notifications.length).toBe(1);

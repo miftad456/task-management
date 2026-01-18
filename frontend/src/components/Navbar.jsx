@@ -16,7 +16,7 @@ const Navbar = ({ onMenuClick }) => {
     const fetchNotifications = async () => {
         try {
             const data = await notificationService.getNotifications();
-            setNotifications(data.notifications);
+            setNotifications((data.notifications || []).filter(n => !n.isRead));
             setUnreadCount(data.unreadCount);
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
@@ -156,7 +156,7 @@ const Navbar = ({ onMenuClick }) => {
                                     ) : (
                                         <div className="p-8 text-center">
                                             <Bell size={32} className="mx-auto text-slate-600 mb-2 opacity-20" />
-                                            <p className="text-slate-500 text-sm">No notifications yet</p>
+                                            <p className="text-slate-500 text-sm">No new notifications</p>
                                         </div>
                                     )}
                                 </div>

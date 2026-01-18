@@ -36,8 +36,9 @@ export const getTaskUsecase = (taskRepository, teamRepository) => {
 
 export const getAllTasksUsecase = (taskRepository) => {
   const getAllTasks = async (userId, search = "", status = "") => {
-    // Return all tasks (personal + assigned)
-    return await taskRepository.findAllByUserId(userId, search, status);
+    // 🔹 Fix: Return only personal tasks (individual tasks)
+    // Assigned tasks are fetched via /tasks/assigned
+    return await taskRepository.findPersonalTasksByUserId(userId, search, status);
   };
   return { getAllTasks };
 };

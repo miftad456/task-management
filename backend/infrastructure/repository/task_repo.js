@@ -138,11 +138,17 @@ export const taskRepository = {
     // Find tasks where userId matches
     const docs = await TaskModel.find({ userId })
       .populate('teamId', 'name')
+      .populate('assignedBy', 'name username')
       .sort({ deadline: 1 })
       .lean();
 
-    // Filter tasks where assignedBy exists and is not null
-    const assignedTasks = docs.filter(doc => doc.assignedBy);
+    // Filter tasks where assignedBy exists AND (if teamId exists, it must be valid/populated)
+    const assignedTasks = docs.filter(doc => {
+      const hasAssigner = !!doc.assignedBy;
+      // If the task has a teamId field, ensure it was successfully populated
+      const hasValidTeam = doc.teamId !== null;
+      return hasAssigner && hasValidTeam;
+    });
 
     return assignedTasks.map(map);
   },

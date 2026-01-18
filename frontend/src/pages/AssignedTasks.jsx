@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ClipboardList, Loader2, Calendar, Flag, CheckCircle2, Clock, Users } from 'lucide-react';
+import { ClipboardList, Loader2, Calendar, Flag, CheckCircle2, Clock, Users, Shield } from 'lucide-react';
 import taskService from '../services/task.service';
 import { Link } from 'react-router-dom';
 
@@ -102,6 +102,12 @@ const AssignedTasks = () => {
                                     <div className="flex items-center gap-2 text-brand-secondary">
                                         <Users size={16} />
                                         <span>{task.teamId.name}</span>
+                                    </div>
+                                )}
+                                {task.assignedBy && (
+                                    <div className="flex items-center gap-2 text-brand-accent">
+                                        <Shield size={16} />
+                                        <span>By {task.assignedBy.name || task.assignedBy.username}</span>
                                     </div>
                                 )}
                                 <Link

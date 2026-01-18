@@ -65,14 +65,23 @@ describe('Task API Endpoints', () => {
     });
 
     describe('GET /tasks/fetch', () => {
-        it('should get all tasks for authenticated user', async () => {
+        it('should get only personal tasks (not assigned ones) for authenticated user', async () => {
             const user = await createTestUser();
+            const manager = await createTestUser({ username: 'manager' });
             const { accessToken } = generateTestToken(user);
 
-            // Create multiple tasks
-            await createTestTask(user._id, { title: 'Task 1' });
-            await createTestTask(user._id, { title: 'Task 2' });
-            await createTestTask(user._id, { title: 'Task 3' });
+            // Create personal tasks
+            await createTestTask(user._id, { title: 'Personal 1' });
+            await createTestTask(user._id, { title: 'Personal 2' });
+
+            // Create an assigned task (manually simulating assignment)
+            const { TaskModel } = await import('../infrastructure/model/task_model.js');
+            await TaskModel.create({
+                title: 'Assigned Task',
+                userId: user._id,
+                assignedBy: manager._id,
+                status: 'pending'
+            });
 
             const response = await request(app)
                 .get('/tasks/fetch')
@@ -80,8 +89,8 @@ describe('Task API Endpoints', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            expect(response.body.data).toBeInstanceOf(Array);
-            expect(response.body.data.length).toBe(3);
+            expect(response.body.data.length).toBe(2);
+            expect(response.body.data.every(t => t.title.startsWith('Personal'))).toBe(true);
         });
 
         it('should return empty array when user has no tasks', async () => {

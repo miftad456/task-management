@@ -34,7 +34,10 @@ export const reviewTaskUsecase = (taskRepository, notificationRepository) => {
             throw new Error("Only the manager who assigned this task can review it");
         }
 
-        if (task.status !== "submitted") {
+        const isAlreadyApproved = task.status === "completed" && action === "approve";
+        const isAlreadyRejected = task.status === "pending" && action === "reject";
+
+        if (task.status !== "submitted" && !isAlreadyApproved && !isAlreadyRejected) {
             throw new Error("Task must be submitted before review");
         }
 
