@@ -12,6 +12,9 @@ export const toTaskResponseDTO = (task, commentCount = null) => {
     assignedBy: task.assignedBy,
     teamId: task.teamId,
     attachments: task.attachments || [],
+    submissionLink: task.submissionLink || "",
+    submissionNote: task.submissionNote || "",
+    managerFeedback: task.managerFeedback || "",
   };
 
   // Add comment count if provided

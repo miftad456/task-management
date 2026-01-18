@@ -16,6 +16,9 @@ const map = (doc) => {
     assignedBy: obj.assignedBy || null,
     teamId: obj.teamId || null,
     attachments: obj.attachments || [],
+    submissionLink: obj.submissionLink || "",
+    submissionNote: obj.submissionNote || "",
+    managerFeedback: obj.managerFeedback || "",
     createdAt: obj.createdAt,
   };
 };
@@ -34,6 +37,9 @@ export const taskRepository = {
       assignedBy: taskEntity.assignedBy || null,
       teamId: taskEntity.teamId || null,
       attachments: taskEntity.attachments || [],
+      submissionLink: taskEntity.submissionLink || "",
+      submissionNote: taskEntity.submissionNote || "",
+      managerFeedback: taskEntity.managerFeedback || "",
     };
     const newTask = await TaskModel.create(toSave);
     return map(newTask);
@@ -132,11 +138,17 @@ export const taskRepository = {
     // Find tasks where userId matches
     const docs = await TaskModel.find({ userId })
       .populate('teamId', 'name')
+      .populate('assignedBy', 'name username')
       .sort({ deadline: 1 })
       .lean();
 
-    // Filter tasks where assignedBy exists and is not null
-    const assignedTasks = docs.filter(doc => doc.assignedBy);
+    // Filter tasks where assignedBy exists AND (if teamId exists, it must be valid/populated)
+    const assignedTasks = docs.filter(doc => {
+      const hasAssigner = !!doc.assignedBy;
+      // If the task has a teamId field, ensure it was successfully populated
+      const hasValidTeam = doc.teamId !== null;
+      return hasAssigner && hasValidTeam;
+    });
 
     return assignedTasks.map(map);
   },

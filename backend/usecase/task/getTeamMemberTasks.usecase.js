@@ -12,15 +12,16 @@ export const getTeamMemberTasksUsecase = (taskRepository, teamRepository) => {
         if (!team) throw new Error("Team not found");
 
         // 2. Verify requester is either the team manager or a team member
-        const isManager = String(team.managerId) === String(requesterId);
-        const isMember = team.members.some(m => String(m) === String(requesterId));
+        const managerId = team.managerId?.id || team.managerId;
+        const isManager = String(managerId) === String(requesterId);
+        const isMember = team.members.some(m => String(m.id || m) === String(requesterId));
 
         if (!isManager && !isMember) {
             throw new Error("Access denied: You must be a team manager or member to view team tasks");
         }
 
         // 3. Verify target user is a team member
-        const isTargetMember = team.members.some(m => String(m) === String(targetUserId));
+        const isTargetMember = team.members.some(m => String(m.id || m) === String(targetUserId));
         if (!isTargetMember) {
             throw new Error("Target user is not a member of this team");
         }

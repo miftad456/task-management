@@ -1,5 +1,5 @@
 export class Task {
-  constructor({ id, title, description, priority, status, deadline, userId, assignedBy = null, teamId = null, createdAt, timeSpent = 0, urgentBeforeMinutes = null, timeLogs = [], attachments = [], submissionLink = "", submissionNote = "", reviewNote = "" }) {
+  constructor({ id, title, description, priority, status, deadline, userId, assignedBy = null, teamId = null, createdAt, timeSpent = 0, urgentBeforeMinutes = null, timeLogs = [], attachments = [], submissionLink = "", submissionNote = "", managerFeedback = "" }) {
     this.id = id;
     this.title = title;
     this.description = description || "";
@@ -14,6 +14,9 @@ export class Task {
     this.urgentBeforeMinutes = urgentBeforeMinutes;
     this.timeLogs = timeLogs;
     this.attachments = attachments;
+    this.submissionLink = submissionLink;
+    this.submissionNote = submissionNote;
+    this.managerFeedback = managerFeedback;
   }
 
   markCompleted() {
@@ -85,6 +88,9 @@ export class Task {
       urgentBeforeMinutes: this.urgentBeforeMinutes,
       timeLogs: this.timeLogs,
       attachments: this.attachments,
+      submissionLink: this.submissionLink,
+      submissionNote: this.submissionNote,
+      managerFeedback: this.managerFeedback,
       createdAt: this.createdAt,
     };
   }

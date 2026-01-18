@@ -3,6 +3,7 @@ import { taskRepository } from "../infrastructure/repository/task_repo.js";
 import { teamRepository } from "../infrastructure/repository/team_repo.js";
 import { timeLogRepository } from "../infrastructure/repository/time_log_repo.js";
 import { commentRepository } from "../infrastructure/repository/comment_repo.js";
+import { notificationRepository } from "../infrastructure/repository/notification_repo.js";
 
 import { passwordService } from "../infrastructure/service/password_service.js";
 import { jwtService } from "../infrastructure/service/jwt_service.js";
@@ -29,6 +30,7 @@ import {
 import { getTeamTasksUsecase } from "../usecase/task/getTeamTasks.usecase.js";
 import { getTeamMemberTasksUsecase } from "../usecase/task/getTeamMemberTasks.usecase.js";
 import { getMyTeamTasksUsecase } from "../usecase/task/getMyTeamTasks.usecase.js";
+import { notificationUsecase } from "../usecase/notification/notification.usecase.js";
 
 import {
   submitTaskUsecase,
@@ -67,6 +69,7 @@ export const dependencies = {
     teamRepository,
     timeLogRepository,
     commentRepository,
+    notificationRepository,
   },
 
   services: {
@@ -78,7 +81,7 @@ export const dependencies = {
     // Task usecases
     createTaskUsecase: createTaskUsecase(taskRepository),
     updateTaskUsecase: updateTaskUsecase(taskRepository),
-    deleteTaskUsecase: deleteTaskUsecase(taskRepository),
+    deleteTaskUsecase: deleteTaskUsecase(taskRepository, teamRepository),
     getTaskUsecase: getTaskUsecase(taskRepository, teamRepository),
     getAllTasksUsecase: getAllTasksUsecase(taskRepository),
     trackTimeUsecase: trackTimeUsecase(taskRepository, timeLogRepository),
@@ -88,11 +91,11 @@ export const dependencies = {
     getUrgentTasksUsecase: getUrgentTasksUsecase({ taskRepository }),
     getTimeLogsUsecase: getTimeLogsUsecase(timeLogRepository),
     uploadAttachmentUsecase: uploadAttachmentUsecase(taskRepository),
-    assignTaskUsecase: assignTaskUsecase(taskRepository, teamRepository),
+    assignTaskUsecase: assignTaskUsecase(taskRepository, teamRepository, notificationRepository),
     getAssignedTasksUsecase: getAssignedTasksUsecase(taskRepository),
     deleteCompletedTasksUsecase: deleteCompletedTasksUsecase(taskRepository),
     submitTaskUsecase: submitTaskUsecase(taskRepository),
-    reviewTaskUsecase: reviewTaskUsecase(taskRepository),
+    reviewTaskUsecase: reviewTaskUsecase(taskRepository, notificationRepository),
     getTeamTasksUsecase: getTeamTasksUsecase(taskRepository, teamRepository),
     getTeamMemberTasksUsecase: getTeamMemberTasksUsecase(taskRepository, teamRepository),
     getMyTeamTasksUsecase: getMyTeamTasksUsecase(taskRepository, teamRepository),
@@ -108,18 +111,18 @@ export const dependencies = {
     getProfileUsecase: getProfileUsecase(userRepository),
 
     // Team usecases
-    teamUsecase: teamUsecase({ teamRepository, userRepository }),
+    teamUsecase: teamUsecase({ teamRepository, userRepository, notificationRepository }),
     teamProfileUsecase: getTeamProfileUsecase({ teamRepository }),
     updateTeamProfileUsecase: updateTeamProfileUsecase({ teamRepository }),
 
     // Comment usecases
-    createCommentUsecase: createCommentUsecase(commentRepository, taskRepository, teamRepository),
+    createCommentUsecase: createCommentUsecase(commentRepository, taskRepository, teamRepository, notificationRepository),
     getCommentsByTaskUsecase: getCommentsByTaskUsecase(commentRepository, taskRepository, teamRepository),
     updateCommentUsecase: updateCommentUsecase(commentRepository),
     deleteCommentUsecase: deleteCommentUsecase(commentRepository),
     // dashboard usecases
     getUserDashboardUsecase: getUserDashboardUsecase(taskRepository),
     getTeamDashboardUsecase: getTeamDashboardUsecase(taskRepository, teamRepository),
-
+    notificationUsecase: notificationUsecase(notificationRepository),
   },
 };

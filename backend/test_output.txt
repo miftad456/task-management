@@ -1,0 +1,322 @@
+
+> backend@1.0.0 test
+> cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand
+
+  console.log
+    ✅ Swagger Docs available at http://localhost:3000/api-docs
+
+      at log (server.js:40:13)
+
+(node:18162) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL __tests__/timelog.test.js
+  Time Log API Endpoints
+    POST /tasks/:id/track
+      ✕ should track time and create a log entry (257 ms)
+      ✕ should accumulate time and multiple logs (123 ms)
+
+  ● Time Log API Endpoints › POST /tasks/:id/track › should track time and create a log entry
+
+    expected 200 "OK", got 404 "Not Found"
+
+      32 |                 .get(`/tasks/${task._id}/logs`)
+      33 |                 .set('Authorization', `Bearer ${accessToken}`)
+    > 34 |                 .expect(200);
+         |                  ^
+      35 |
+      36 |             expect(logsResponse.body.success).toBe(true);
+      37 |             expect(logsResponse.body.data.length).toBe(1);
+
+      at Object.expect (__tests__/timelog.test.js:34:18)
+      ----
+      at Test._assertStatus (node_modules/supertest/lib/test.js:309:14)
+      at node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (node_modules/supertest/lib/test.js:195:23)
+      at localAssert (node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (node_modules/supertest/lib/test.js:152:11)
+
+  ● Time Log API Endpoints › POST /tasks/:id/track › should accumulate time and multiple logs
+
+    expected 200 "OK", got 404 "Not Found"
+
+      65 |                 .get(`/tasks/${task._id}/logs`)
+      66 |                 .set('Authorization', `Bearer ${accessToken}`)
+    > 67 |                 .expect(200);
+         |                  ^
+      68 |
+      69 |             expect(logsResponse.body.data.length).toBe(2);
+      70 |             expect(logsResponse.body.data[0].note).toBe('Log 2'); // Sorted by newest first
+
+      at Object.expect (__tests__/timelog.test.js:67:18)
+      ----
+      at Test._assertStatus (node_modules/supertest/lib/test.js:309:14)
+      at node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (node_modules/supertest/lib/test.js:195:23)
+      at localAssert (node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (node_modules/supertest/lib/test.js:152:11)
+
+  console.log
+    ✅ Swagger Docs available at http://localhost:3000/api-docs
+
+      at log (server.js:40:13)
+
+PASS __tests__/teamTasks.test.js (8.388 s)
+  Team Task Visibility - GET /tasks/team/:teamId/tasks
+    ✓ Manager can view all team tasks (503 ms)
+    ✓ Team member cannot view all team tasks (403) (376 ms)
+    ✓ Non-team-member cannot view team tasks (403) (294 ms)
+    ✓ Returns empty array when team has no tasks (319 ms)
+  Team Task Visibility - GET /tasks/team/:teamId/tasks/member/:userId
+    ✓ Team member can view another member's tasks (read-only) (352 ms)
+    ✓ Manager can view specific member's tasks (308 ms)
+    ✓ Non-team-member cannot view member tasks (403) (300 ms)
+    ✓ Cannot view tasks of user not in team (400) (293 ms)
+    ✓ Returns empty array when member has no tasks (289 ms)
+  Team Task Visibility - GET /tasks/team/:teamId/my-tasks
+    ✓ Team member can view own tasks in team context (334 ms)
+    ✓ Manager can view own tasks in team context (279 ms)
+    ✓ Non-team-member cannot view team tasks (403) (274 ms)
+    ✓ Returns empty array when user has no tasks in team (292 ms)
+  Task Assignment with teamId
+    ✓ Assigned tasks include teamId (300 ms)
+    ✓ Self-created tasks have null teamId (302 ms)
+  Read-Only Enforcement
+    ✓ Task owner can update their own task (305 ms)
+    ✓ Other team member cannot update task (400) (302 ms)
+    ✓ Other team member cannot delete task (400) (311 ms)
+    ✓ Manager cannot update member's task directly (350 ms)
+  Backward Compatibility
+    ✓ Existing tasks without teamId still work (303 ms)
+    ✓ User can still fetch all their tasks (with and without teamId) (327 ms)
+
+  console.log
+    ✅ Swagger Docs available at http://localhost:3000/api-docs
+
+      at log (server.js:40:13)
+
+PASS __tests__/comment.test.js (6.054 s)
+  Comment API Endpoints
+    POST /comments/task/:taskId
+      ✓ should add a comment to a task (212 ms)
+      ✓ should fail if content is missing (86 ms)
+    GET /comments/task/:taskId
+      ✓ should get all comments for a task (123 ms)
+    DELETE /comments/:id
+      ✓ should delete own comment (104 ms)
+      ✓ should fail to delete someone else's comment (164 ms)
+    PUT /comments/:id
+      ✓ should update own comment (99 ms)
+      ✓ should fail to update someone else's comment (171 ms)
+      ✓ should fail with empty content (93 ms)
+      ✓ should fail with content exceeding 1000 characters (120 ms)
+    Comment User Info
+      ✓ should include user info (username and name) in comment response (96 ms)
+      ✓ should include user info when fetching comments (102 ms)
+    Team-Based Access Control
+      Personal Task Comments
+        ✓ should allow task owner to comment on personal task (299 ms)
+        ✓ should deny non-owner from commenting on personal task (294 ms)
+        ✓ should allow task owner to view comments on personal task (311 ms)
+        ✓ should deny non-owner from viewing comments on personal task (344 ms)
+      Team Task Comments
+        ✓ should allow manager to comment on team task (297 ms)
+        ✓ should allow team member to comment on team task (313 ms)
+        ✓ should deny non-member from commenting on team task (296 ms)
+        ✓ should allow team members to view all comments on team task (312 ms)
+        ✓ should deny non-member from viewing comments on team task (325 ms)
+    Comment Count in Tasks
+      ✓ should include comment count when fetching a task (105 ms)
+      ✓ should show zero comment count for task with no comments (79 ms)
+    Comment Validation
+      ✓ should fail with empty content (77 ms)
+      ✓ should fail with content exceeding 1000 characters (80 ms)
+      ✓ should accept content with exactly 1000 characters (86 ms)
+
+  console.log
+    ✅ Swagger Docs available at http://localhost:3000/api-docs
+
+      at log (server.js:40:13)
+
+PASS __tests__/team.test.js (5.18 s)
+  Team API Endpoints
+    POST /teams
+      ✓ should create a team successfully (230 ms)
+      ✓ should fail to create team without authentication (14 ms)
+    POST /teams/:teamId/member
+      ✓ should add member to team by username (202 ms)
+      ✓ should add member to team by userId (217 ms)
+      ✓ should fail to add member if not manager (251 ms)
+      ✓ should fail to add non-existent user (107 ms)
+    DELETE /teams/:teamId/member
+      ✓ should remove member from team (163 ms)
+      ✓ should fail to remove member if not manager (225 ms)
+    GET /teams/:teamId
+      ✓ should get team by ID as manager (96 ms)
+      ✓ should get team by ID as member (161 ms)
+      ✓ should fail to get team if not manager or member (166 ms)
+    GET /teams/by-name/:name
+      ✓ should get team by name as manager (86 ms)
+      ✓ should fail to get team by name if not manager role (156 ms)
+    GET /teams/manager/all
+      ✓ should get all teams managed by user (96 ms)
+      ✓ should fail if user is not a manager (77 ms)
+    GET /teams/member/all
+      ✓ should get all teams where user is a member (174 ms)
+    DELETE /teams/:teamId/leave
+      ✓ should request to leave team as member (178 ms)
+      ✓ should fail to request leave if not a member (165 ms)
+    GET /teams/:teamId/leave-requests
+      ✓ should get pending leave requests as manager (197 ms)
+      ✓ should fail to get leave requests if not manager (153 ms)
+    PUT /teams/:teamId/leave-request/:requestId/approve
+      ✓ should approve leave request as manager (180 ms)
+    PUT /teams/:teamId/leave-request/:requestId/reject
+      ✓ should reject leave request as manager (169 ms)
+
+  console.log
+    ✅ Swagger Docs available at http://localhost:3000/api-docs
+
+      at log (server.js:40:13)
+
+PASS __tests__/task.test.js
+  Task API Endpoints
+    POST /tasks/create
+      ✓ should create a new task successfully (192 ms)
+      ✓ should fail to create task without authentication (18 ms)
+      ✓ should fail to create task with invalid data (81 ms)
+    GET /tasks/fetch
+      ✓ should get all tasks for authenticated user (96 ms)
+      ✓ should return empty array when user has no tasks (82 ms)
+      ✓ should fail to get tasks without authentication (8 ms)
+    GET /tasks/:id
+      ✓ should get task by ID for owner (98 ms)
+      ✓ should fail to get task owned by another user (171 ms)
+      ✓ should fail to get non-existent task (86 ms)
+    PUT /tasks/:id
+      ✓ should update task successfully (89 ms)
+      ✓ should fail to update task owned by another user (145 ms)
+    DELETE /tasks/:id
+      ✓ should delete task successfully (85 ms)
+      ✓ should fail to delete task owned by another user (149 ms)
+    PATCH /tasks/:id/status
+      ✓ should update task status successfully (88 ms)
+    PATCH /tasks/:id/priority
+      ✓ should update task priority successfully (93 ms)
+    POST /tasks/:id/track
+      ✓ should track time on task successfully (89 ms)
+      ✓ should accumulate time tracking (84 ms)
+    GET /tasks/overdue
+      ✓ should get overdue tasks (84 ms)
+    GET /tasks/urgent
+      ✓ should get urgent tasks based on priority and deadline (89 ms)
+
+  console.log
+    ✅ Swagger Docs available at http://localhost:3000/api-docs
+
+      at log (server.js:40:13)
+
+PASS __tests__/dashboard.test.js
+  Dashboard API
+    GET /dashboard
+      ✓ should return user dashboard stats (172 ms)
+      ✓ should fail without authentication (13 ms)
+    GET /dashboard/team/:teamId
+      ✓ should allow team manager to view team dashboard (127 ms)
+      ✓ should deny access for non-manager (155 ms)
+
+  console.log
+    ✅ Swagger Docs available at http://localhost:3000/api-docs
+
+      at log (server.js:40:13)
+
+PASS __tests__/user.test.js
+  User API Endpoints
+    POST /users/register
+      ✓ should register a new user successfully (205 ms)
+      ✓ should fail to register user with missing fields (32 ms)
+      ✓ should fail to register user with duplicate username (241 ms)
+    POST /users/login
+      ✓ should login user with correct credentials (205 ms)
+      ✓ should fail to login with incorrect password (175 ms)
+      ✓ should fail to login with non-existent username (20 ms)
+    GET /users/:id
+      ✓ should get user profile with valid authentication (204 ms)
+      ✓ should fail to get user profile without authentication (213 ms)
+      ✓ should fail to get non-existent user (143 ms)
+    PUT /users/:id
+      ✓ should update user profile successfully (90 ms)
+      ✓ should fail to update user without authentication (79 ms)
+    POST /users/refresh-token
+      ✓ should refresh access token with valid refresh token (153 ms)
+      ✓ should fail to refresh token without refresh token (9 ms)
+      ✓ should fail to refresh token with invalid token (11 ms)
+    POST /users/logout
+      ✓ should logout user successfully (181 ms)
+      ✓ should fail to logout without refresh token (10 ms)
+
+  console.log
+    ✅ Swagger Docs available at http://localhost:3000/api-docs
+
+      at log (server.js:40:13)
+
+PASS __tests__/assignment.test.js
+  Task Assignment and Submission API
+    POST /tasks/assign
+      ✓ should allow a manager to assign a task to a team member (233 ms)
+      ✓ should fail if requester is not the manager of the team (240 ms)
+    Submission Workflow
+      ✓ should allow a member to submit an assigned task (171 ms)
+      ✓ should allow a manager to approve a submitted task (162 ms)
+      ✓ should allow a manager to reject a submitted task (169 ms)
+    GET /tasks/assigned
+      ✓ should allow a member to fetch tasks assigned to them (163 ms)
+      ✓ should not return tasks created by the user themselves (169 ms)
+
+  console.log
+    ✅ Swagger Docs available at http://localhost:3000/api-docs
+
+      at log (server.js:40:13)
+
+PASS __tests__/upload.test.js
+  File Upload API Endpoints
+    POST /tasks/:id/attachments
+      ✓ should upload a file and attach it to a task (180 ms)
+      ✓ should fail if no file is uploaded (126 ms)
+      ✓ should fail with invalid file type (184 ms)
+
+  console.log
+    ✅ Swagger Docs available at http://localhost:3000/api-docs
+
+      at log (server.js:40:13)
+
+PASS __tests__/profile.test.js
+  User Profile API
+    GET /users/profile/:id
+      ✓ should fetch a user profile (140 ms)
+      ✓ should fail for non-existent user (88 ms)
+    PUT /users/profile/update
+      ✓ should update user profile fields (93 ms)
+    POST /users/profile/picture
+      ✓ should upload a profile picture (92 ms)
+      ✓ should fail if no file is uploaded (78 ms)
+
+  console.log
+    ✅ Swagger Docs available at http://localhost:3000/api-docs
+
+      at log (server.js:40:13)
+
+PASS __tests__/search_sort.test.js
+  Task Sorting and Searching API
+    GET /tasks/fetch (Sorting)
+      ✓ should return tasks sorted by deadline (closest first) (127 ms)
+    GET /tasks/fetch (Searching)
+      ✓ should filter tasks by title using search query (84 ms)
+      ✓ should return empty array if no tasks match search (87 ms)
+
+Test Suites: 1 failed, 10 passed, 11 total
+Tests:       2 failed, 125 passed, 127 total
+Snapshots:   0 total
+Time:        39.095 s, estimated 52 s
+Ran all test suites.

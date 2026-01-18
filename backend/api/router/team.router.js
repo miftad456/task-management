@@ -5,6 +5,7 @@ import { success, failure } from "../utilities/response.js";
 import { authorizeTeamManager } from "../middlewares/teamAccess.middleware.js";
 import { toTeamResponseDTO } from "../dto/team.dto.js";
 import { upload } from "../middlewares/upload.middleware.js";
+import { roleMiddleware } from "../middlewares/role.middleware.js";
 
 /**
  * @swagger
@@ -152,7 +153,7 @@ export const teamRouter = (dependencies) => {
    *       200:
    *         description: Teams retrieved
    */
-  router.get("/manager/all", authMiddleware, async (req, res) => {
+  router.get("/manager/all", authMiddleware, roleMiddleware("manager"), async (req, res) => {
     try {
       const teams = await teamUsecase.getTeamsByManager(req.user.id);
       res.json(success("Teams fetched", teams.map(t => toTeamResponseDTO(t, req.user.id))));
@@ -173,7 +174,7 @@ export const teamRouter = (dependencies) => {
    *       200:
    *         description: Stats retrieved
    */
-  router.get("/manager/stats", authMiddleware, async (req, res) => {
+  router.get("/manager/stats", authMiddleware, roleMiddleware("manager"), async (req, res) => {
     try {
       const stats = await teamUsecase.getManagerStats(req.user.id);
       res.json(success("Stats fetched", stats));
@@ -229,6 +230,15 @@ export const teamRouter = (dependencies) => {
       res.status(400).json(failure(err.message));
     }
   });
+
+  router.get("/by-name/:name", authMiddleware, roleMiddleware("manager"), async (req, res) => {
+    try {
+      const team = await teamUsecase.getTeamByName(req.user.id, req.params.name);
+      res.json(success("Team fetched", toTeamResponseDTO(team, req.user.id)));
+    } catch (err) {
+      res.status(400).json(failure(err.message));
+    }
+  });
   /**
    * @swagger
    * /teams/{teamId}:
@@ -250,6 +260,16 @@ export const teamRouter = (dependencies) => {
   router.get("/:teamId", authMiddleware, async (req, res) => {
     try {
       const team = await teamUsecase.getTeamById(req.params.teamId);
+      if (!team) return res.status(404).json(failure("Team not found"));
+
+      const managerId = team.managerId?.id || team.managerId;
+      const isManager = String(managerId) === String(req.user.id);
+      const isMember = (team.members || []).some(m => String(m.id || m) === String(req.user.id));
+
+      if (!isManager && !isMember) {
+        return res.status(403).json(failure("Access denied"));
+      }
+
       res.json(success("Team fetched", toTeamResponseDTO(team, req.user.id)));
     } catch (err) {
       res.status(400).json(failure(err.message));
@@ -437,24 +457,6 @@ export const teamRouter = (dependencies) => {
     }
   });
 
-  /**
-   * @swagger
-   * /teams/leave-requests/{requestId}/reject:
-   *   put:
-   *     summary: Reject a leave request (Manager only)
-   *     tags: [Teams]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: requestId
-   *         required: true
-   *         schema:
-   *           type: string
-   *     responses:
-   *       200:
-   *         description: Leave request rejected
-   */
   router.put("/leave-requests/:requestId/reject", authMiddleware, async (req, res) => {
     try {
       const updated = await teamUsecase.rejectLeave(req.params.requestId, req.user.id);

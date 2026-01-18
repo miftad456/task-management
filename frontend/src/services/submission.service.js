@@ -1,8 +1,8 @@
 import api from './api';
 
 const submissionService = {
-    submitTask: async (taskId, note = '') => {
-        const response = await api.post(`/submissions/task/${taskId}`, { note });
+    submitTask: async (taskId, link = '', note = '') => {
+        const response = await api.post(`/submissions/task/${taskId}`, { link, note });
         return response.data.data;
     },
 

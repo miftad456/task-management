@@ -1,15 +1,16 @@
 import { Comment } from "../../domain/entities/comment.entity.js";
 
-export const createCommentUsecase = (commentRepository, taskRepository, teamRepository) => {
+export const createCommentUsecase = (commentRepository, taskRepository, teamRepository, notificationRepository) => {
     const createComment = async (taskId, content, userId) => {
         // 1. Verify task exists
         const task = await taskRepository.findById(taskId);
         if (!task) throw new Error("Task not found");
 
+        let team = null;
         // 2. Access control based on task type
         if (task.teamId) {
             // Team task: verify user is manager or team member
-            const team = await teamRepository.findById(task.teamId);
+            team = await teamRepository.findById(task.teamId);
             if (!team) throw new Error("Team not found");
 
             const isManager = String(team.managerId.id || team.managerId) === String(userId);
@@ -31,7 +32,37 @@ export const createCommentUsecase = (commentRepository, taskRepository, teamRepo
             userId,
         });
 
-        return await commentRepository.create(comment);
+        const savedComment = await commentRepository.create(comment);
+
+        // 3. Trigger notifications for team tasks
+        if (task.teamId && notificationRepository) {
+            const managerId = team.managerId.id || team.managerId;
+            const assigneeId = task.userId;
+
+            // Notify Assignee if commenter is NOT the assignee
+            if (String(userId) !== String(assigneeId)) {
+                await notificationRepository.create({
+                    recipientId: assigneeId,
+                    senderId: userId,
+                    type: "comment_added",
+                    message: `New comment on your task "${task.title}"`,
+                    link: `/task/${taskId}`,
+                });
+            }
+
+            // Notify Manager if commenter is NOT the manager
+            if (String(userId) !== String(managerId)) {
+                await notificationRepository.create({
+                    recipientId: managerId,
+                    senderId: userId,
+                    type: "comment_added",
+                    message: `New comment on team task "${task.title}"`,
+                    link: `/task/${taskId}`,
+                });
+            }
+        }
+
+        return savedComment;
     };
     return { createComment };
 };

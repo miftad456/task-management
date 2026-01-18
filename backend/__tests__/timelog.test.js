@@ -19,7 +19,7 @@ describe('Time Log API Endpoints', () => {
             };
 
             const response = await request(app)
-                .post(`/tasks/${task._id}/track`)
+                .post(`/tasks/${task._id}/track-time`)
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send(logData)
                 .expect(200);
@@ -47,14 +47,14 @@ describe('Time Log API Endpoints', () => {
 
             // First log
             await request(app)
-                .post(`/tasks/${task._id}/track`)
+                .post(`/tasks/${task._id}/track-time`)
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({ minutes: 20, note: 'Log 1' })
                 .expect(200);
 
             // Second log
             const response = await request(app)
-                .post(`/tasks/${task._id}/track`)
+                .post(`/tasks/${task._id}/track-time`)
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({ minutes: 40, note: 'Log 2' })
                 .expect(200);

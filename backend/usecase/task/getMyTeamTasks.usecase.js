@@ -11,8 +11,9 @@ export const getMyTeamTasksUsecase = (taskRepository, teamRepository) => {
         if (!team) throw new Error("Team not found");
 
         // 2. Verify user is either the manager or a team member
-        const isManager = String(team.managerId) === String(userId);
-        const isMember = team.members.some(m => String(m) === String(userId));
+        const managerId = team.managerId?.id || team.managerId;
+        const isManager = String(managerId) === String(userId);
+        const isMember = team.members.some(m => String(m.id || m) === String(userId));
 
         if (!isManager && !isMember) {
             throw new Error("Access denied: You are not a member of this team");

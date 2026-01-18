@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { TeamModel } from "../model/team_model.js";
 import { TeamLeaveRequestModel } from "../model/team_leave_request_model.js";
+import { TaskModel } from "../model/task_model.js";
 import { Team } from "../../domain/entities/team.entity.js";
 
 // Map MongoDB document to Team entity
@@ -103,6 +104,10 @@ export const teamRepository = {
     );
 
     const saved = await team.save();
+
+    // 🔹 Remove teamId from tasks assigned to this user in this team
+    await TaskModel.updateMany({ teamId, userId }, { teamId: null });
+
     return mapDocToTeam(saved);
   },
 
@@ -176,6 +181,9 @@ export const teamRepository = {
     );
     await team.save();
 
+    // 🔹 Remove teamId from tasks assigned to this user in this team
+    await TaskModel.updateMany({ teamId: req.teamId, userId: req.userId }, { teamId: null });
+
     return req;
   },
 
@@ -190,6 +198,7 @@ export const teamRepository = {
 
   delete: async (id) => {
     await TeamLeaveRequestModel.deleteMany({ teamId: id });
+    await TaskModel.deleteMany({ teamId: id });
     return await TeamModel.findByIdAndDelete(id);
   },
 

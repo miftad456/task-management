@@ -73,7 +73,7 @@ describe("Team Task Visibility - GET /tasks/team/:teamId/tasks", () => {
         expect(res.body.data.map(t => t.title)).toContain("Task for Member 2");
     });
 
-    test("Team member cannot view all team tasks (403)", async () => {
+    test("Team member can view all team tasks", async () => {
         // Manager assigns task
         await request(app)
             .post("/tasks/assign")
@@ -89,9 +89,9 @@ describe("Team Task Visibility - GET /tasks/team/:teamId/tasks", () => {
             .get(`/tasks/team/${teamId}/tasks`)
             .set("Authorization", `Bearer ${member1Token}`);
 
-        expect(res.status).toBe(403);
-        expect(res.body.success).toBe(false);
-        expect(res.body.message).toContain("Only the team manager");
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.data).toHaveLength(1);
     });
 
     test("Non-team-member cannot view team tasks (403)", async () => {

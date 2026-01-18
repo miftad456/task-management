@@ -10,6 +10,7 @@ import { teamRouter } from "./api/router/team.router.js";
 import { commentRouter } from "./api/router/comment.router.js";
 import { dashboardRouter } from "./api/router/dashboard.router.js";
 import { submissionRouter } from "./api/router/submission.router.js";
+import { notificationRouter } from "./api/router/notification.router.js";
 import { dependencies } from "./api/dependencies.js";
 import { swaggerOptions } from "./swagger.config.js";
 
@@ -49,9 +50,19 @@ export const createServer = () => {
   app.use("/dashboard", dashboardRouter(dependencies));
   app.use("/comments", commentRouter(dependencies));
   app.use("/submissions", submissionRouter(dependencies));
+  app.use("/notifications", notificationRouter(dependencies));
 
   app.get("/", (req, res) => {
     res.send("Task Management API is running...");
+  });
+
+  // Global Error Handler
+  app.use((err, req, res, next) => {
+    const status = err.status || 400;
+    res.status(status).json({
+      success: false,
+      message: err.message || "Internal Server Error",
+    });
   });
 
   return app;

@@ -1,7 +1,7 @@
 // src/usecase/team/team.usecase.js
 import { Team } from "../../domain/entities/team.entity.js";
 
-export const teamUsecase = ({ teamRepository, userRepository }) => {
+export const teamUsecase = ({ teamRepository, userRepository, notificationRepository }) => {
   // Create a new team
   const createTeam = async (name, userId) => {
     if (!name) throw new Error("Team name is required");
@@ -128,7 +128,22 @@ export const teamUsecase = ({ teamRepository, userRepository }) => {
       throw new Error("User is not a member of this team");
     }
 
-    return await teamRepository.requestLeave(teamId, userId);
+    const result = await teamRepository.requestLeave(teamId, userId);
+
+    // 🔹 Create notification for the manager
+    if (notificationRepository) {
+      const user = await userRepository.findById(userId);
+      await notificationRepository.create({
+        recipientId: team.managerId.id || team.managerId,
+        senderId: userId,
+        type: "leave_request",
+        message: `${user?.username || "A member"} has requested to leave the team: ${team.name}`,
+        link: `/team/${teamId}`,
+        isUrgent: true
+      });
+    }
+
+    return result;
   };
 
   // 2️⃣ Manager fetches leave requests for his team
