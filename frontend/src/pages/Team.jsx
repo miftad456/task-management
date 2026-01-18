@@ -150,7 +150,7 @@ const Team = () => {
                                             }}
                                             className={`font-bold hover:underline ${activeTab === 'managed' ? 'text-brand-primary' : 'text-brand-secondary'}`}
                                         >
-                                            {team.managerId?.username || 'Manager'}
+                                            {team.managerId?.name || team.managerId?.username || 'Manager'}
                                         </button> • {team.members?.length || 0} Members
                                     </p>
                                 </div>
@@ -206,7 +206,7 @@ const Team = () => {
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'managed' ? 'bg-brand-primary/20 text-brand-primary' : 'bg-brand-secondary/20 text-brand-secondary'}`}>
                                             <Shield size={16} />
                                         </div>
-                                        <span className="text-sm font-medium text-white">Manager {activeTab === 'managed' ? '(You)' : `(${team.managerId?.username || 'Owner'})`}</span>
+                                        <span className="text-sm font-medium text-white">Manager {activeTab === 'managed' ? '(You)' : `(${team.managerId?.name || team.managerId?.username || 'Owner'})`}</span>
                                     </div>
                                 </div>
 
@@ -229,7 +229,7 @@ const Team = () => {
                                                     <User size={16} />
                                                 )}
                                             </div>
-                                            <span className="text-sm font-medium text-white truncate max-w-[80px]">{member.username || member}</span>
+                                            <span className="text-sm font-medium text-white truncate max-w-[80px]">{member.name || member.username || member}</span>
                                         </div>
                                     </div>
                                 ))}

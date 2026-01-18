@@ -265,7 +265,7 @@ describe('Task API Endpoints', () => {
             const task = await createTestTask(user._id, { timeSpent: 0 });
 
             const response = await request(app)
-                .post(`/tasks/${task._id}/track`)
+                .post(`/tasks/${task._id}/track-time`)
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({ minutes: 30 })
                 .expect(200);
@@ -280,7 +280,7 @@ describe('Task API Endpoints', () => {
             const task = await createTestTask(user._id, { timeSpent: 15 });
 
             const response = await request(app)
-                .post(`/tasks/${task._id}/track`)
+                .post(`/tasks/${task._id}/track-time`)
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({ minutes: 45 })
                 .expect(200);

@@ -36,8 +36,8 @@ export const getTaskUsecase = (taskRepository, teamRepository) => {
 
 export const getAllTasksUsecase = (taskRepository) => {
   const getAllTasks = async (userId, search = "", status = "") => {
-    // Return only personal tasks (where assignedBy is null)
-    return await taskRepository.findPersonalTasksByUserId(userId, search, status);
+    // Return all tasks (personal + assigned)
+    return await taskRepository.findAllByUserId(userId, search, status);
   };
   return { getAllTasks };
 };
@@ -245,7 +245,7 @@ export const uploadAttachmentUsecase = (taskRepository) => {
 };
 
 
-export const assignTaskUsecase = (taskRepository, teamRepository) => {
+export const assignTaskUsecase = (taskRepository, teamRepository, notificationRepository) => {
   const assignTask = async (taskData, managerId) => {
     const { userId, teamId } = taskData;
     if (!userId || !teamId) throw new Error("User ID and Team ID are required for assignment");
@@ -276,7 +276,21 @@ export const assignTaskUsecase = (taskRepository, teamRepository) => {
       teamId: teamId, // Set teamId for team-based queries
     });
 
-    return await taskRepository.create(task);
+    const savedTask = await taskRepository.create(task);
+
+    // 4. Create notification for the assigned user
+    if (notificationRepository) {
+      await notificationRepository.create({
+        recipientId: userId,
+        senderId: managerId,
+        type: "task_assigned",
+        message: `You have been assigned a new task: ${task.title}`,
+        link: `/task/${savedTask.id}`,
+        isUrgent: task.priority === "high"
+      });
+    }
+
+    return savedTask;
   };
   return { assignTask };
 };

@@ -306,7 +306,7 @@ const TeamDetails = () => {
                                         <Shield size={20} />
                                     </div>
                                     <div>
-                                        <span className="block text-white font-bold">{team.managerId?.username || 'Manager'}</span>
+                                        <span className="block text-white font-bold">{team.managerId?.name || team.managerId?.username || 'Manager'}</span>
                                         <span className="text-sm text-slate-500">{isManager ? 'You (Manager)' : 'Team Manager'}</span>
                                     </div>
                                 </div>
@@ -333,7 +333,7 @@ const TeamDetails = () => {
                                                 {renderImage(member.profilePicture, member.username, 20)}
                                             </div>
                                             <div>
-                                                <span className="block text-white font-bold">{member.username}</span>
+                                                <span className="block text-white font-bold">{member.name || member.username}</span>
                                                 <span className="text-sm text-slate-500">Team Member</span>
                                             </div>
                                         </div>

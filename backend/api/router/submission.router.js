@@ -98,6 +98,7 @@ export const submissionRouter = (dependencies) => {
             const task = await reviewTaskUsecase.reviewTask(req.params.id, req.user?.id, action, note);
             res.json(success(`Task ${action}ed`, toTaskResponseDTO(task)));
         } catch (err) {
+            console.error('ROUTER ERROR:', err.message);
             res.status(400).json(failure(err.message));
         }
     });

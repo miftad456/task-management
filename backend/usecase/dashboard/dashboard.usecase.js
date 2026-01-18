@@ -31,7 +31,8 @@ export const getTeamDashboardUsecase = (taskRepository, teamRepository) => {
         const team = await teamRepository.findById(teamId);
         if (!team) throw new Error("Team not found");
 
-        if (String(team.managerId) !== String(requesterId)) {
+        const managerId = team.managerId?.id || team.managerId;
+        if (String(managerId) !== String(requesterId)) {
             throw new Error("Access denied");
         }
 

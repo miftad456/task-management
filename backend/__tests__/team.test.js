@@ -19,7 +19,7 @@ describe('Team API Endpoints', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.message).toBe('Team created');
             expect(response.body.data.name).toBe('Engineering Team');
-            expect(response.body.data.managerId).toBe(manager._id.toString());
+            expect(response.body.data.managerId.id || response.body.data.managerId).toBe(manager._id.toString());
             expect(response.body.data.id).toBeDefined();
         });
 
@@ -49,7 +49,7 @@ describe('Team API Endpoints', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.message).toBe('Member added');
             expect(response.body.data.username).toBe('newmember');
-            expect(response.body.data.team.members).toContain(member._id.toString());
+            expect(response.body.data.team.members.map(m => m.id || m)).toContain(member._id.toString());
         });
 
         it('should add member to team by userId', async () => {
@@ -65,7 +65,7 @@ describe('Team API Endpoints', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            expect(response.body.data.team.members).toContain(member._id.toString());
+            expect(response.body.data.team.members.map(m => m.id || m)).toContain(member._id.toString());
         });
 
         it('should fail to add member if not manager', async () => {
@@ -115,7 +115,7 @@ describe('Team API Endpoints', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.message).toBe('Member removed');
             expect(response.body.data.username).toBe('removeme');
-            expect(response.body.data.team.members).not.toContain(member._id.toString());
+            expect(response.body.data.team.members.map(m => m.id || m)).not.toContain(member._id.toString());
         });
 
         it('should fail to remove member if not manager', async () => {
@@ -148,7 +148,7 @@ describe('Team API Endpoints', () => {
 
             expect(response.body.success).toBe(true);
             expect(response.body.data.name).toBe('My Team');
-            expect(response.body.data.managerId).toBe(manager._id.toString());
+            expect(response.body.data.managerId.id || response.body.data.managerId).toBe(manager._id.toString());
         });
 
         it('should get team by ID as member', async () => {
@@ -163,7 +163,7 @@ describe('Team API Endpoints', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            expect(response.body.data.members).toContain(member._id.toString());
+            expect(response.body.data.members.map(m => m.id || m)).toContain(member._id.toString());
         });
 
         it('should fail to get team if not manager or member', async () => {
@@ -345,6 +345,16 @@ describe('Team API Endpoints', () => {
             const { accessToken: memberToken } = generateTestToken(member);
             const team = await createTestTeam(manager._id, { members: [member._id] });
 
+            // Create a task for this member in this team
+            await request(app)
+                .post('/tasks/assign')
+                .set('Authorization', `Bearer ${managerToken}`)
+                .send({
+                    title: 'Team Task',
+                    userId: member._id.toString(),
+                    teamId: team.id
+                });
+
             // Member requests to leave
             const leaveResponse = await request(app)
                 .delete(`/teams/${team.id}/leave`)
@@ -354,13 +364,30 @@ describe('Team API Endpoints', () => {
 
             // Manager approves
             const response = await request(app)
-                .put(`/teams/${team.id}/leave-request/${requestId}/approve`)
+                .put(`/teams/leave-requests/${requestId}/approve`)
                 .set('Authorization', `Bearer ${managerToken}`)
                 .expect(200);
 
             expect(response.body.success).toBe(true);
             expect(response.body.message).toBe('Leave request approved');
             expect(response.body.data.status).toBe('approved');
+
+            // Verify member is removed from team
+            const teamRes = await request(app)
+                .get(`/teams/${team.id}`)
+                .set('Authorization', `Bearer ${managerToken}`);
+            expect(teamRes.body.data.members.map(m => m.id || m)).not.toContain(member._id.toString());
+
+            // Verify tasks are cleaned up (teamId set to null)
+            // We need to check the database directly or via an endpoint
+            // Since we don't have a direct "all tasks" for manager that includes unassigned, 
+            // we can check via the team tasks endpoint
+            const teamTasksRes = await request(app)
+                .get(`/tasks/team/${team.id}/tasks`)
+                .set('Authorization', `Bearer ${managerToken}`);
+
+            // The task we created for the member should no longer be in the team tasks
+            expect(teamTasksRes.body.data.length).toBe(0);
         });
     });
 
@@ -381,7 +408,7 @@ describe('Team API Endpoints', () => {
 
             // Manager rejects
             const response = await request(app)
-                .put(`/teams/${team.id}/leave-request/${requestId}/reject`)
+                .put(`/teams/leave-requests/${requestId}/reject`)
                 .set('Authorization', `Bearer ${managerToken}`)
                 .expect(200);
 

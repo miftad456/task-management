@@ -24,7 +24,7 @@ export const submitTaskUsecase = (taskRepository) => {
     return { submitTask };
 };
 
-export const reviewTaskUsecase = (taskRepository) => {
+export const reviewTaskUsecase = (taskRepository, notificationRepository) => {
     const reviewTask = async (taskId, managerId, action, reviewNote = "") => {
         const task = await taskRepository.findById(taskId);
         if (!task) throw new Error("Task not found");
@@ -39,10 +39,17 @@ export const reviewTaskUsecase = (taskRepository) => {
         }
 
         let newStatus;
+        let notificationType;
+        let message;
+
         if (action === "approve") {
             newStatus = "completed";
+            notificationType = "task_approved";
+            message = `Your submission for task "${task.title}" has been approved!`;
         } else if (action === "reject") {
             newStatus = "pending";
+            notificationType = "task_rejected";
+            message = `Your submission for task "${task.title}" has been rejected. Feedback: ${reviewNote || "No feedback provided."}`;
         } else {
             throw new Error("Invalid review action. Use 'approve' or 'reject'");
         }
@@ -51,6 +58,18 @@ export const reviewTaskUsecase = (taskRepository) => {
             status: newStatus,
             managerFeedback: reviewNote
         });
+
+        // 🔹 Create notification for the member
+        if (notificationRepository) {
+            await notificationRepository.create({
+                recipientId: task.userId,
+                senderId: managerId,
+                type: notificationType,
+                message: message,
+                link: `/task/${taskId}`,
+                isUrgent: action === "reject"
+            });
+        }
 
         return updatedTask;
     };

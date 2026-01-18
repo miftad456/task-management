@@ -333,7 +333,8 @@ export const taskRouter = (dependencies) => {
       const tasks = await getTeamTasksUsecase.getTeamTasks(req.params.teamId, req.user?.id);
       res.json(success("Team tasks fetched", (tasks || []).map(toTaskResponseDTO)));
     } catch (err) {
-      res.status(400).json(failure(err.message));
+      const status = err.message.includes("Access denied") ? 403 : 400;
+      res.status(status).json(failure(err.message));
     }
   });
 
@@ -360,7 +361,7 @@ export const taskRouter = (dependencies) => {
    *       200:
    *         description: Member tasks fetched
    */
-  router.get("/team/:teamId/member/:userId", authMiddleware, async (req, res) => {
+  router.get("/team/:teamId/tasks/member/:userId", authMiddleware, async (req, res) => {
     try {
       const tasks = await getTeamMemberTasksUsecase.getTeamMemberTasks(
         req.params.teamId,
@@ -369,7 +370,8 @@ export const taskRouter = (dependencies) => {
       );
       res.json(success("Member tasks fetched", (tasks || []).map(toTaskResponseDTO)));
     } catch (err) {
-      res.status(400).json(failure(err.message));
+      const status = err.message.includes("Access denied") ? 403 : 400;
+      res.status(status).json(failure(err.message));
     }
   });
 
@@ -391,7 +393,7 @@ export const taskRouter = (dependencies) => {
    *       200:
    *         description: My team tasks fetched
    */
-  router.get("/my-team-tasks/:teamId", authMiddleware, async (req, res) => {
+  router.get("/team/:teamId/my-tasks", authMiddleware, async (req, res) => {
     try {
       const tasks = await getMyTeamTasksUsecase.getMyTeamTasks(
         req.params.teamId,
@@ -399,7 +401,8 @@ export const taskRouter = (dependencies) => {
       );
       res.json(success("My team tasks fetched", (tasks || []).map(toTaskResponseDTO)));
     } catch (err) {
-      res.status(400).json(failure(err.message));
+      const status = err.message.includes("Access denied") ? 403 : 400;
+      res.status(status).json(failure(err.message));
     }
   });
 
@@ -512,6 +515,15 @@ export const taskRouter = (dependencies) => {
     try {
       const task = await trackTimeUsecase.trackTime(req.params.id, req.body, req.user?.id);
       res.json(success("Time tracked", toTaskResponseDTO(task)));
+    } catch (err) {
+      res.status(400).json(failure(err.message));
+    }
+  });
+
+  router.get("/:id/logs", authMiddleware, async (req, res) => {
+    try {
+      const logs = await getTimeLogsUsecase.getTimeLogs(req.params.id);
+      res.json(success("Time logs fetched", logs));
     } catch (err) {
       res.status(400).json(failure(err.message));
     }

@@ -21,8 +21,8 @@ export const toTeamResponseDTO = (team, requesterId) => {
     return {
       id: team.id,
       name: team.name,
-      managerId: team.managerId,
-      members: team.members,
+      managerId: team.managerId, // Return the populated object or ID
+      members: team.members,     // Return the populated objects or IDs
       createdAt: team.createdAt,
       ...profileData // Injects bio and profilePicture
     };
