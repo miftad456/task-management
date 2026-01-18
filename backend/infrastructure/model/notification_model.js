@@ -7,7 +7,7 @@ const notificationSchema = new mongoose.Schema(
         senderModel: { type: String, enum: ["User", "Team"], default: "User" },
         type: {
             type: String,
-            enum: ["task_assigned", "leave_request", "urgent_task", "comment_added"],
+            enum: ["task_assigned", "leave_request", "urgent_task", "comment_added", "task_approved", "task_rejected"],
             required: true
         },
         message: { type: String, required: true },
