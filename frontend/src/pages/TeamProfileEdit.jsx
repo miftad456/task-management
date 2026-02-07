@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Users, Camera, Save, Loader2, AlertCircle, CheckCircle2, AlignLeft, ArrowLeft } from 'lucide-react';
 import teamService from '../services/team.service';
+import { getImageUrl } from '../config';
 
 const TeamProfileEdit = () => {
     const { teamId } = useParams();
@@ -15,15 +16,6 @@ const TeamProfileEdit = () => {
     const [uploading, setUploading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [error, setError] = useState('');
-
-    const API_BASE_URL = 'http://localhost:3000';
-
-    // Helper: normalize image URL
-    const getImageUrl = (path) => {
-        if (!path) return null;
-        // Align with Profile.jsx logic: http://localhost:3000/uploads/filename.jpg
-        return `${API_BASE_URL}/${String(path).replace(/\\/g, '/')}`;
-    };
 
     useEffect(() => {
         const fetchTeam = async () => {

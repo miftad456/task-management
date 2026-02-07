@@ -98,7 +98,7 @@ export const taskRouter = (dependencies) => {
         taskData.attachments = [{
           filename: req.file.filename,
           originalName: req.file.originalname,
-          url: `/uploads/${req.file.filename}`,
+          url: req.file.path, // Cloudinary URL
           mimetype: req.file.mimetype,
           size: req.file.size,
           uploadedAt: new Date(),

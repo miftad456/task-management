@@ -37,7 +37,7 @@ export const teamUsecase = ({ teamRepository, userRepository, notificationReposi
     const byUsername = await userRepository.findByUsername(identifier);
     if (byUsername) return byUsername;
 
-    throw new Error("User not found");
+    throw new Error("We cannot find this user");
   };
 
   // Add member - returns both updated team and added user's username
@@ -45,7 +45,7 @@ export const teamUsecase = ({ teamRepository, userRepository, notificationReposi
     if (!teamId || !identifier) throw new Error("Team ID and user identifier are required");
 
     const team = await teamRepository.findById(teamId);
-    if (!team) throw new Error("Team not found");
+    if (!team) throw new Error("We cannot find this team");
 
     const user = await resolveUser(identifier);
 
@@ -65,7 +65,7 @@ export const teamUsecase = ({ teamRepository, userRepository, notificationReposi
     if (!teamId || !identifier) throw new Error("Team ID and user identifier are required");
 
     const team = await teamRepository.findById(teamId);
-    if (!team) throw new Error("Team not found");
+    if (!team) throw new Error("We cannot find this team");
 
     const user = await resolveUser(identifier);
 
@@ -83,7 +83,7 @@ export const teamUsecase = ({ teamRepository, userRepository, notificationReposi
   const getTeamById = async (teamId) => {
     if (!teamId) throw new Error("Team ID is required");
     const team = await teamRepository.findById(teamId);
-    if (!team) throw new Error("Team not found");
+    if (!team) throw new Error("We cannot find this team");
     return team;
   };
 
@@ -102,7 +102,7 @@ export const teamUsecase = ({ teamRepository, userRepository, notificationReposi
     if (!name) throw new Error("Team name is required");
 
     const team = await teamRepository.findByManagerAndName(managerId, name);
-    if (!team) throw new Error("Team not found");
+    if (!team) throw new Error("We cannot find this team");
 
     return team;
   };
@@ -116,7 +116,7 @@ export const teamUsecase = ({ teamRepository, userRepository, notificationReposi
     if (!teamId || !userId) throw new Error("Team ID and User ID are required");
 
     const team = await teamRepository.findById(teamId);
-    if (!team) throw new Error("Team not found");
+    if (!team) throw new Error("We cannot find this team");
 
     // Ensure member belongs to the team
     const isMember = (team.members || []).some(m => {
@@ -155,7 +155,7 @@ export const teamUsecase = ({ teamRepository, userRepository, notificationReposi
     if (status && !allowed.includes(status)) throw new Error("Invalid status filter");
 
     const team = await teamRepository.findById(teamId);
-    if (!team) throw new Error("Team not found");
+    if (!team) throw new Error("We cannot find this team");
 
     const teamManagerId = team.managerId?.id || team.managerId;
     if (String(teamManagerId) !== String(managerId)) {
@@ -170,10 +170,10 @@ export const teamUsecase = ({ teamRepository, userRepository, notificationReposi
     if (!requestId || !managerId) throw new Error("Request ID and Manager ID required");
 
     const request = await teamRepository.getLeaveRequestById(requestId);
-    if (!request) throw new Error("Leave request not found");
+    if (!request) throw new Error("We cannot find this leave request");
 
     const team = await teamRepository.findById(request.teamId);
-    if (!team) throw new Error("Team not found");
+    if (!team) throw new Error("We cannot find this team");
 
     const teamManagerId = team.managerId?.id || team.managerId;
     if (String(teamManagerId) !== String(managerId)) {
@@ -188,10 +188,10 @@ export const teamUsecase = ({ teamRepository, userRepository, notificationReposi
     if (!requestId || !managerId) throw new Error("Request ID and Manager ID required");
 
     const request = await teamRepository.getLeaveRequestById(requestId);
-    if (!request) throw new Error("Leave request not found");
+    if (!request) throw new Error("We cannot find this leave request");
 
     const team = await teamRepository.findById(request.teamId);
-    if (!team) throw new Error("Team not found");
+    if (!team) throw new Error("We cannot find this team");
 
     const teamManagerId = team.managerId?.id || team.managerId;
     if (String(teamManagerId) !== String(managerId)) {
@@ -205,7 +205,7 @@ export const teamUsecase = ({ teamRepository, userRepository, notificationReposi
     if (!teamId || !managerId) throw new Error("Team ID and Manager ID required");
 
     const team = await teamRepository.findById(teamId);
-    if (!team) throw new Error("Team not found");
+    if (!team) throw new Error("We cannot find this team");
 
     const teamManagerId = team.managerId?.id || team.managerId;
     if (String(teamManagerId) !== String(managerId)) {

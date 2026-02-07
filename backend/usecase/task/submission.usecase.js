@@ -1,7 +1,7 @@
 export const submitTaskUsecase = (taskRepository) => {
     const submitTask = async (taskId, userId, submissionLink = "", submissionNote = "") => {
         const task = await taskRepository.findById(taskId);
-        if (!task) throw new Error("Task not found");
+        if (!task) throw new Error("We cannot find this task");
 
         // Only the assigned user can submit
         if (String(task.userId) !== String(userId)) {
@@ -27,7 +27,7 @@ export const submitTaskUsecase = (taskRepository) => {
 export const reviewTaskUsecase = (taskRepository, notificationRepository) => {
     const reviewTask = async (taskId, managerId, action, reviewNote = "") => {
         const task = await taskRepository.findById(taskId);
-        if (!task) throw new Error("Task not found");
+        if (!task) throw new Error("We cannot find this task");
 
         // Only the manager who assigned it can review
         if (String(task.assignedBy) !== String(managerId)) {

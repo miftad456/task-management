@@ -29,7 +29,7 @@ export const getUserDashboardUsecase = (taskRepository) => {
 export const getTeamDashboardUsecase = (taskRepository, teamRepository) => {
     const getDashboard = async (teamId, requesterId) => {
         const team = await teamRepository.findById(teamId);
-        if (!team) throw new Error("Team not found");
+        if (!team) throw new Error("We cannot find this team");
 
         const managerId = team.managerId?.id || team.managerId;
         if (String(managerId) !== String(requesterId)) {

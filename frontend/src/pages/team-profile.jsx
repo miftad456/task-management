@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Users, Camera, Save, Loader2, AlertCircle, CheckCircle2, AlignLeft, Info } from 'lucide-react';
 import teamService from '../services/team.service';
 import api from '../services/api';
+import { getImageUrl } from '../config';
 
 const TeamProfile = ({ team: initialTeam }) => {
     // Local state for form data
@@ -93,7 +94,7 @@ const TeamProfile = ({ team: initialTeam }) => {
                                 <div className="w-full h-full rounded-full bg-[#0f172a] flex items-center justify-center overflow-hidden relative">
                                     {team?.profilePicture ? (
                                         <img
-                                            src={`http://localhost:3000/${team.profilePicture}`}
+                                            src={getImageUrl(team.profilePicture)}
                                             alt="Team Logo"
                                             className="w-full h-full object-cover"
                                         />

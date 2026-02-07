@@ -20,7 +20,7 @@ import taskService from '../services/task.service';
 import submissionService from '../services/submission.service';
 import CommentSection from '../components/CommentSection';
 import useAuthStore from '../store/useAuthStore';
-import { API_BASE_URL } from '../config';
+import { getImageUrl } from '../config';
 
 const TaskDetails = () => {
     const { taskId } = useParams();
@@ -75,7 +75,8 @@ const TaskDetails = () => {
     const handleDownload = (attachment) => {
         // Create a temporary link to trigger download
         const link = document.createElement('a');
-        link.href = `${API_BASE_URL}${attachment.url}`; // Assuming backend is on port 3000
+        const fileUrl = getImageUrl(attachment.url) || attachment.url;
+        link.href = fileUrl;
         link.setAttribute('download', attachment.originalName);
         link.setAttribute('target', '_blank');
         document.body.appendChild(link);
@@ -355,7 +356,7 @@ const TaskDetails = () => {
                                     {file.mimetype.startsWith('image/') && (
                                         <div className="mt-4 rounded-lg overflow-hidden border border-white/5 bg-black/20">
                                             <img
-                                                src={`${API_BASE_URL}${file.url}`}
+                                                src={getImageUrl(file.url)}
                                                 alt={file.originalName}
                                                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
                                             />

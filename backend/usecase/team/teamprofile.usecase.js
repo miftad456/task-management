@@ -1,7 +1,7 @@
 export const updateTeamProfileUsecase = ({ teamRepository }) => {
     const execute = async (teamId, managerId, profileData) => {
         const team = await teamRepository.findById(teamId);
-        if (!team) throw new Error("Team not found");
+        if (!team) throw new Error("We cannot find this team");
 
         const teamManagerId = team.managerId?.id || team.managerId;
         if (String(teamManagerId) !== String(managerId)) {
@@ -23,7 +23,7 @@ export const updateTeamProfileUsecase = ({ teamRepository }) => {
 export const getTeamProfileUsecase = ({ teamRepository }) => {
     const execute = async (teamId) => {
         const team = await teamRepository.findById(teamId);
-        if (!team) throw new Error("Team not found");
+        if (!team) throw new Error("We cannot find this team");
         return team; // Return the whole entity, the DTO will filter it later
     };
     return { execute };

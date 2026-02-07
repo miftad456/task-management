@@ -6,6 +6,7 @@ import teamService from '../services/team.service';
 import useAuthStore from '../store/useAuthStore';
 import Modal from '../components/Modal';
 import UserProfileModal from '../components/UserProfileModal';
+import { getImageUrl } from '../config';
 
 const Team = () => {
     const navigate = useNavigate();
@@ -224,7 +225,7 @@ const Team = () => {
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-brand-primary/20 group-hover:text-brand-primary transition-colors overflow-hidden">
                                                 {member.profilePicture ? (
-                                                    <img src={`http://localhost:3000/${member.profilePicture}`} alt="" className="w-full h-full object-cover" />
+                                                    <img src={getImageUrl(member.profilePicture)} alt="" className="w-full h-full object-cover" />
                                                 ) : (
                                                     <User size={16} />
                                                 )}

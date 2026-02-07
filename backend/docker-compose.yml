@@ -1,0 +1,39 @@
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: taskmanagement-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URL=${MONGO_URL}
+      - JWT_SECRET=${JWT_SECRET:-miftah_jwt_secret}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-miftah_jwt_refresh_secret}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - PORT=3000
+      - NODE_ENV=production
+    volumes:
+      - backend_uploads:/app/uploads
+    networks:
+      - taskmanagement-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+
+# Named volumes for data persistence
+volumes:
+  backend_uploads:
+    driver: local
+
+# Custom network for service communication
+networks:
+  taskmanagement-network:
+    driver: bridge
