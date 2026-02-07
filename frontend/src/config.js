@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://localhost:3000';
+export const API_BASE_URL = 'https://task-management-4dmu.onrender.com';
 
 /**
  * Helper function to get the correct image URL
