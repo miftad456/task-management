@@ -2,45 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Users, AlignLeft, Loader2 } from 'lucide-react';
 import teamService from '../services/team.service';
+import { getImageUrl } from '../config';
 
 const TeamProfileModal = ({ isOpen, onClose, teamId }) => {
     const [team, setTeam] = useState(null);
     const [loading, setLoading] = useState(true);
-
-    const API_BASE_URL = 'http://localhost:3000';
-
-    useEffect(() => {
-        if (!isOpen || !teamId) return;
-
-        const fetchTeam = async () => {
-            setLoading(true);
-            try {
-                const data = await teamService.getTeamProfile(teamId);
-                setTeam(data);
-            } catch (err) {
-                console.error("Error fetching team profile:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTeam();
-    }, [isOpen, teamId]);
-
-    // UPDATED: Simple and robust URL generator
-    const getImageUrl = (path) => {
-        if (!path) return null;
-
-        // Fix Windows slashes
-        const normalized = path.replace(/\\/g, '/');
-
-        // If path is "uploads/file.png", result is "http://localhost:3000/uploads/file.png"
-        // If path is "file.png", result is "http://localhost:3000/uploads/file.png"
-        if (normalized.startsWith('uploads/')) {
-            return `${API_BASE_URL}/${normalized}`;
-        }
-        return `${API_BASE_URL}/uploads/${normalized}`;
-    };
 
     return (
         <AnimatePresence>

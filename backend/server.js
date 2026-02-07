@@ -1,7 +1,5 @@
 import express from "express";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { taskRouter } from "./api/router/task.router.js";
@@ -14,23 +12,13 @@ import { notificationRouter } from "./api/router/notification.router.js";
 import { dependencies } from "./api/dependencies.js";
 import { swaggerOptions } from "./swagger.config.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// ... existing imports ...
 
 export const createServer = () => {
   const app = express();
   app.use(cors());
   app.use(express.json());
 
-  // UPDATED: Serve the root folder so that 'uploads/filename.jpg' 
-  // from the DB works directly as http://localhost:3000/uploads/filename.jpg
-  app.use(express.static(path.join(__dirname)));
-
-  // Keep this as a backup if you prefer specific routing
-  app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
+  // Swagger documentation setup
   try {
     const specs = swaggerJsdoc(swaggerOptions);
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {

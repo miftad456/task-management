@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import notificationService from '../services/notification.service';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getImageUrl } from '../config';
 
 const Navbar = ({ onMenuClick }) => {
     const { user, logout } = useAuthStore();
@@ -178,7 +179,7 @@ const Navbar = ({ onMenuClick }) => {
                     </div>
                     <Link to="/profile" className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center text-white font-bold shadow-lg shadow-brand-primary/20 hover:scale-110 transition-transform overflow-hidden">
                         {user?.profilePicture ? (
-                            <img src={`http://localhost:3000/${user.profilePicture}`} alt="Profile" className="w-full h-full object-cover" />
+                            <img src={getImageUrl(user.profilePicture)} alt="Profile" className="w-full h-full object-cover" />
                         ) : (
                             getInitials(user?.name, user?.username)
                         )}

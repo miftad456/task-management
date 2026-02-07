@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { User, Mail, Camera, Save, Loader2, AlertCircle, CheckCircle2, AlignLeft } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import api from '../services/api';
-import { API_BASE_URL } from '../config';
+import { getImageUrl } from '../config';
 
 const Profile = () => {
     const { user, updateProfile, loading, error } = useAuthStore();
@@ -65,7 +65,7 @@ const Profile = () => {
                             <div className="w-32 h-32 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary p-1 shadow-2xl shadow-brand-primary/20">
                                 <div className="w-full h-full rounded-full bg-[#0f172a] flex items-center justify-center overflow-hidden">
                                     {user?.profilePicture ? (
-                                        <img src={`${API_BASE_URL}/${user.profilePicture}`} alt="Profile" className="w-full h-full object-cover" />
+                                        <img src={getImageUrl(user.profilePicture)} alt="Profile" className="w-full h-full object-cover" />
                                     ) : (
                                         <User size={64} className="text-slate-700" />
                                     )}

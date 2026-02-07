@@ -8,6 +8,7 @@ import taskService from '../services/task.service';
 import useAuthStore from '../store/useAuthStore';
 import Modal from '../components/Modal';
 import UserProfileModal from '../components/UserProfileModal';
+import { getImageUrl } from '../config';
 
 const TeamDetails = () => {
     const { teamId } = useParams();
@@ -30,19 +31,17 @@ const TeamDetails = () => {
 
     const [teamTasks, setTeamTasks] = useState([]);
     const [dashboardLoading, setDashboardLoading] = useState(false);
-    const API_BASE_URL = 'http://localhost:3000';
 
     // Utility to render images or fallback
     const renderImage = (path, altText, iconSize = 32) => {
         if (!path) return <Users size={iconSize} className="text-slate-600" />;
 
-        const cleanPath = String(path).replace(/\\/g, '/');
-        // Align with Profile.jsx logic: http://localhost:3000/uploads/filename.jpg
-        const fullUrl = cleanPath.startsWith('http') ? cleanPath : `${API_BASE_URL}/${cleanPath}`;
+        const imageUrl = getImageUrl(path);
+        if (!imageUrl) return <Users size={iconSize} className="text-slate-600" />;
 
         return (
             <img
-                src={fullUrl}
+                src={imageUrl}
                 alt={altText}
                 className="w-full h-full object-cover"
                 onError={(e) => {

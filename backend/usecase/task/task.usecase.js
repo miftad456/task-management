@@ -231,7 +231,7 @@ export const uploadAttachmentUsecase = (taskRepository) => {
     const newAttachment = {
       filename: fileData.filename,
       originalName: fileData.originalname,
-      url: `/uploads/${fileData.filename}`,
+      url: fileData.path, // Cloudinary URL
       mimetype: fileData.mimetype,
       size: fileData.size,
       uploadedAt: new Date(),
@@ -244,6 +244,7 @@ export const uploadAttachmentUsecase = (taskRepository) => {
   };
   return { uploadAttachment };
 };
+
 
 
 export const assignTaskUsecase = (taskRepository, teamRepository, notificationRepository) => {

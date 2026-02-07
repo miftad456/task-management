@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, User, Mail, Briefcase, AlignLeft, Loader2 } from 'lucide-react';
 import api from '../services/api';
+import { getImageUrl } from '../config';
 
 const UserProfileModal = ({ isOpen, onClose, userId, username }) => {
     const [profile, setProfile] = useState(null);
@@ -69,7 +70,7 @@ const UserProfileModal = ({ isOpen, onClose, userId, username }) => {
                                         <div className="w-full h-full rounded-full bg-[#0f172a] flex items-center justify-center overflow-hidden">
                                             {profile.profilePicture ? (
                                                 <img
-                                                    src={`http://localhost:3000/${profile.profilePicture}`}
+                                                    src={getImageUrl(profile.profilePicture)}
                                                     alt={profile.name}
                                                     className="w-full h-full object-cover"
                                                 />
