@@ -12,12 +12,8 @@ export const swaggerOptions = {
         },
         servers: [
             {
-                url: 'http://localhost:3000',
-                description: 'Development server',
-            },
-            {
-                url: 'http://localhost:3001',
-                description: 'Test server',
+                url: 'https://task-management-4dmu.onrender.com',
+                description: 'Production server',
             },
         ],
         // ✅ Control order of tags here
